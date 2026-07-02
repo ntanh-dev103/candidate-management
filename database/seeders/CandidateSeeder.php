@@ -10,7 +10,6 @@ class CandidateSeeder extends Seeder
     public function run(): void
     {
         
-
         Candidate::factory()->count(20)->create();
     }
 }

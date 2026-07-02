@@ -6,150 +6,221 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 
-<body>
+<body class="bg-light">
 
 <div class="container mt-5">
 
-    <h2>Candidate Management</h2>
+    <div class="card shadow">
 
-    <a href="{{ route('candidates.create') }}" class="btn btn-primary mb-3">
-        Add Candidate
-    </a>
-    <!-- FORM SEARCH ĐẶT Ở ĐÂY -->
-<form action="{{ route('candidates.index') }}" method="GET" class="row mb-3">
+        <div class="card-header bg-primary text-white">
 
-    <div class="col-md-4">
-        <input
-            type="text"
-            name="search"
-            class="form-control"
-            placeholder="Search by name..."
-            value="{{ request('search') }}">
-    </div>
+            <h3 class="mb-0">Candidate Management</h3>
 
-    <div class="col-md-3">
-        <select name="status" class="form-select">
+        </div>
 
-            <option value="">All Status</option>
+        <div class="card-body">
 
-            <option value="Applied"
-                {{ request('status') == 'Applied' ? 'selected' : '' }}>
-                Applied
-            </option>
+            @if(session('success'))
+                <div class="alert alert-success">
+                    {{ session('success') }}
+                </div>
+            @endif
 
-            <option value="Interview"
-                {{ request('status') == 'Interview' ? 'selected' : '' }}>
-                Interview
-            </option>
+            <!-- Search + Filter + Add -->
+            <div class="row mb-3">
 
-            <option value="Hired"
-                {{ request('status') == 'Hired' ? 'selected' : '' }}>
-                Hired
-            </option>
+                <div class="col-md-9">
 
-            <option value="Rejected"
-                {{ request('status') == 'Rejected' ? 'selected' : '' }}>
-                Rejected
-            </option>
+                    <form action="{{ route('candidates.index') }}" method="GET">
 
-        </select>
-    </div>
+                        <div class="row">
 
-    <div class="col-md-2">
-        <button class="btn btn-primary">
-            Search
-        </button>
-    </div>
+                            <div class="col-md-5">
 
-    <div class="col-md-2">
-        <a href="{{ route('candidates.index') }}" class="btn btn-secondary">
-            Reset
-        </a>
-    </div>
+                                <input
+                                    type="text"
+                                    name="search"
+                                    class="form-control"
+                                    placeholder="Search by name..."
+                                    value="{{ request('search') }}">
 
-</form>
+                            </div>
 
+                            <div class="col-md-3">
 
+                                <select name="status" class="form-select">
 
-<table class="table table-bordered">
-    @if(session('success'))
+                                    <option value="">All Status</option>
 
-<div class="alert alert-success">
+                                    <option value="Applied"
+                                        {{ request('status')=='Applied' ? 'selected' : '' }}>
+                                        Applied
+                                    </option>
 
-{{ session('success') }}
+                                    <option value="Interview"
+                                        {{ request('status')=='Interview' ? 'selected' : '' }}>
+                                        Interview
+                                    </option>
 
-</div>
+                                    <option value="Hired"
+                                        {{ request('status')=='Hired' ? 'selected' : '' }}>
+                                        Hired
+                                    </option>
 
-@endif
-    <table class="table table-bordered">
+                                    <option value="Rejected"
+                                        {{ request('status')=='Rejected' ? 'selected' : '' }}>
+                                        Rejected
+                                    </option>
 
-        <thead>
+                                </select>
 
-        <tr>
+                            </div>
 
-            <th>ID</th>
-            <th>Full Name</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>Status</th>
-            <th width="220">Action</th>
+                            <div class="col-md-2">
 
-        </tr>
+                                <button class="btn btn-primary w-100">
+                                    Search
+                                </button>
 
-        </thead>
+                            </div>
 
-        <tbody>
+                            <div class="col-md-2">
 
-        @forelse($candidates as $candidate)
+                                <a href="{{ route('candidates.index') }}"
+                                   class="btn btn-secondary w-100">
+                                    Reset
+                                </a>
 
-            <tr>
+                            </div>
 
-                <td>{{ $candidate->id }}</td>
+                        </div>
 
-                <td>{{ $candidate->full_name }}</td>
-
-                <td>{{ $candidate->email }}</td>
-
-                <td>{{ $candidate->phone }}</td>
-
-                <td>{{ $candidate->status }}</td>
-
-                <td>
-                    <a href="{{ route('candidates.show',$candidate) }}" class="btn btn-info btn-sm">View</a>
-
-                    <a href="{{ route('candidates.edit',$candidate) }}" class="btn btn-warning btn-sm">Edit</a>
-
-                    <form action="{{ route('candidates.destroy',$candidate) }}" method="POST" style="display:inline;">
-                        @csrf
-                        @method('DELETE')
-
-                        <button class="btn btn-danger btn-sm"
-                                onclick="return confirm('Delete this candidate?')">
-                            Delete
-                        </button>
                     </form>
-                </td>
 
-            </tr>
+                </div>
 
-        @empty
+                <div class="col-md-3 text-end">
 
-            <tr>
+                    <a href="{{ route('candidates.create') }}"
+                       class="btn btn-success">
+                        + Add Candidate
+                    </a>
 
-                <td colspan="6" class="text-center">
-                    No candidates found.
-                </td>
+                </div>
 
-            </tr>
+            </div>
 
-        @endforelse
-        
+            <table class="table table-bordered table-hover align-middle">
 
-        </tbody>
+                <thead class="table-dark">
 
-    </table>
+                <tr>
 
-    {{ $candidates->links() }}
+                    <th>ID</th>
+                    <th>Full Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Status</th>
+                    <th width="220">Action</th>
+
+                </tr>
+
+                </thead>
+
+                <tbody>
+
+                @forelse($candidates as $candidate)
+
+                    <tr>
+
+                        <td>{{ $candidate->id }}</td>
+
+                        <td>{{ $candidate->full_name }}</td>
+
+                        <td>{{ $candidate->email }}</td>
+
+                        <td>{{ $candidate->phone }}</td>
+
+                        <td>
+
+                            @if($candidate->status=='Applied')
+                                <span class="badge bg-secondary">Applied</span>
+
+                            @elseif($candidate->status=='Interview')
+                                <span class="badge bg-warning text-dark">Interview</span>
+
+                            @elseif($candidate->status=='Hired')
+                                <span class="badge bg-success">Hired</span>
+
+                            @else
+                                <span class="badge bg-danger">Rejected</span>
+
+                            @endif
+
+                        </td>
+
+                        <td>
+
+                            <a href="{{ route('candidates.show',$candidate) }}"
+                               class="btn btn-info btn-sm">
+                                View
+                            </a>
+
+                            <a href="{{ route('candidates.edit',$candidate) }}"
+                               class="btn btn-warning btn-sm">
+                                Edit
+                            </a>
+
+                            <form
+                                action="{{ route('candidates.destroy',$candidate) }}"
+                                method="POST"
+                                style="display:inline;">
+
+                                @csrf
+                                @method('DELETE')
+
+                                <button
+                                    class="btn btn-danger btn-sm"
+                                    onclick="return confirm('Delete this candidate?')">
+
+                                    Delete
+
+                                </button>
+
+                            </form>
+
+                        </td>
+
+                    </tr>
+
+                @empty
+
+                    <tr>
+
+                        <td colspan="6" class="text-center">
+
+                            No candidates found.
+
+                        </td>
+
+                    </tr>
+
+                @endforelse
+
+                </tbody>
+
+            </table>
+
+            <!-- Pagination -->
+            <div class="d-flex justify-content-center mt-4">
+
+                {{ $candidates->links() }}
+
+            </div>
+
+        </div>
+
+    </div>
 
 </div>
 
