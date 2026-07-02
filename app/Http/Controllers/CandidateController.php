@@ -44,9 +44,10 @@ class CandidateController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Candidate $candidate)
     {
         //
+         return view('candidates.show', compact('candidate'));
     }
 
     /**
