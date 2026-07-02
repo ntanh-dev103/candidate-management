@@ -77,8 +77,13 @@ class CandidateController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Candidate $candidate)
     {
         //
+        $candidate->delete();
+
+        return redirect()
+        ->route('candidates.index')
+        ->with('success', 'Candidate deleted successfully.');
     }
 }
