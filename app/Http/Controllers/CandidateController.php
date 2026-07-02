@@ -16,9 +16,24 @@ class CandidateController extends Controller
     public function index()
     {
         //
-         $candidates = Candidate::paginate(10);
+   
+
+    $query = Candidate::query();
+
+    // Tìm kiếm theo tên
+    if (request('search')) {
+        $query->where('full_name', 'like', '%' . request('search') . '%');
+    }
+
+    // Lọc theo trạng thái
+    if (request('status')) {
+        $query->where('status', request('status'));
+    }
+
+    $candidates = $query->paginate(10)->appends(request()->query());
 
     return view('candidates.index', compact('candidates'));
+
     }
 
     /**

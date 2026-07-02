@@ -15,6 +15,63 @@
     <a href="{{ route('candidates.create') }}" class="btn btn-primary mb-3">
         Add Candidate
     </a>
+    <!-- FORM SEARCH ĐẶT Ở ĐÂY -->
+<form action="{{ route('candidates.index') }}" method="GET" class="row mb-3">
+
+    <div class="col-md-4">
+        <input
+            type="text"
+            name="search"
+            class="form-control"
+            placeholder="Search by name..."
+            value="{{ request('search') }}">
+    </div>
+
+    <div class="col-md-3">
+        <select name="status" class="form-select">
+
+            <option value="">All Status</option>
+
+            <option value="Applied"
+                {{ request('status') == 'Applied' ? 'selected' : '' }}>
+                Applied
+            </option>
+
+            <option value="Interview"
+                {{ request('status') == 'Interview' ? 'selected' : '' }}>
+                Interview
+            </option>
+
+            <option value="Hired"
+                {{ request('status') == 'Hired' ? 'selected' : '' }}>
+                Hired
+            </option>
+
+            <option value="Rejected"
+                {{ request('status') == 'Rejected' ? 'selected' : '' }}>
+                Rejected
+            </option>
+
+        </select>
+    </div>
+
+    <div class="col-md-2">
+        <button class="btn btn-primary">
+            Search
+        </button>
+    </div>
+
+    <div class="col-md-2">
+        <a href="{{ route('candidates.index') }}" class="btn btn-secondary">
+            Reset
+        </a>
+    </div>
+
+</form>
+
+
+
+<table class="table table-bordered">
     @if(session('success'))
 
 <div class="alert alert-success">
