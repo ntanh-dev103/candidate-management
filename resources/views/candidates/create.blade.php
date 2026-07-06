@@ -1,111 +1,32 @@
-<!DOCTYPE html>
-<html>
-<head>
+@extends('layouts.app')
 
-    <title>Add Candidate</title>
+@section('content')
+<div class="container mt-4">
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <h2>Add Candidate</h2>
 
-</head>
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <strong>Vui lòng kiểm tra lại thông tin!</strong>
+            <ul class="mb-0 mt-2">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 
-<body>
+    <form action="{{ route('candidates.store') }}" method="POST" enctype="multipart/form-data">
+        @csrf
 
-<div class="container mt-5">
+        @include('candidates.form')
 
-<h2>Add Candidate</h2>
+        <button class="btn btn-success">Save</button>
 
-<form action="{{ route('candidates.store') }}" method="POST">
-
-@csrf
-
-<div class="mb-3">
-
-<label>Full Name</label>
-
-<input
-type="text"
-name="full_name"
-class="form-control"
-value="{{ old('full_name') }}">
-
-@error('full_name')
-<div class="text-danger">{{ $message }}</div>
-@enderror
+        <a href="{{ route('candidates.index') }}" class="btn btn-secondary">
+            Back
+        </a>
+    </form>
 
 </div>
-
-<div class="mb-3">
-
-<label>Email</label>
-
-<input
-type="email"
-name="email"
-class="form-control"
-value="{{ old('email') }}">
-
-@error('email')
-<div class="text-danger">{{ $message }}</div>
-@enderror
-
-</div>
-
-<div class="mb-3">
-
-<label>Phone</label>
-
-<input
-type="text"
-name="phone"
-class="form-control"
-value="{{ old('phone') }}">
-
-@error('phone')
-<div class="text-danger">{{ $message }}</div>
-@enderror
-
-</div>
-
-<div class="mb-3">
-
-<label>Status</label>
-
-<select
-name="status"
-class="form-control">
-
-<option value="">Choose</option>
-
-<option value="Applied">Applied</option>
-
-<option value="Interview">Interview</option>
-
-<option value="Hired">Hired</option>
-
-<option value="Rejected">Rejected</option>
-
-</select>
-
-@error('status')
-<div class="text-danger">{{ $message }}</div>
-@enderror
-
-</div>
-
-<button class="btn btn-success">
-Save
-</button>
-
-<a href="{{ route('candidates.index') }}"
-class="btn btn-secondary">
-
-Back
-
-</a>
-
-</form>
-
-</div>
-
-</body>
-</html>
+@endsection

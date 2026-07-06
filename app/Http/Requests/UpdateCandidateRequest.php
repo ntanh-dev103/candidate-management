@@ -7,16 +7,24 @@ use Illuminate\Validation\Rule;
 
 class UpdateCandidateRequest extends FormRequest
 {
+    /**
+     * Determine if the user is authorized to make this request.
+     */
     public function authorize(): bool
     {
         return true;
     }
 
+    /**
+     * Validation Rules
+     */
     public function rules(): array
     {
         $candidate = $this->route('candidate');
 
         return [
+
+            // Basic
             'full_name' => 'required|max:255',
 
             'email' => [
@@ -25,9 +33,44 @@ class UpdateCandidateRequest extends FormRequest
                 Rule::unique('candidates')->ignore($candidate),
             ],
 
-            'phone' => 'required',
+            'phone' => 'required|max:20',
 
-            'status' => 'required',
+            'status' => 'required|in:Applied,Interview,Hired,Rejected',
+
+            // Personal
+            'date_of_birth' => 'nullable|date',
+
+            'gender' => 'nullable|in:male,female,other',
+
+            'avatar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+
+            'address' => 'nullable|string|max:255',
+
+            'current_country' => 'nullable|in:VN,JP,KR,TW,DE',
+
+            // Professional
+            'headline' => 'nullable|string|max:255',
+
+            'experience_years' => 'nullable|integer|min:0|max:50',
+
+            'education_level' => 'nullable|in:high_school,college,bachelor,master',
+
+            'current_job_title' => 'nullable|string|max:255',
+
+            'cv' => 'nullable|mimes:pdf|max:5120',
+
+            // Career
+            'desired_country' => 'nullable|in:JP,KR,DE,TW',
+
+            'desired_job_type' => 'nullable|in:full_time,part_time,contract',
+
+            'desired_salary_min' => 'nullable|numeric|min:0',
+
+            'desired_salary_currency' => 'nullable|in:JPY,VND,USD',
+
+            // Account
+            'is_profile_complete' => 'nullable|boolean',
+
         ];
     }
 }

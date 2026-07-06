@@ -1,106 +1,37 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Edit Candidate</title>
+@extends('layouts.app')
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
+@section('content')
 
-<div class="container mt-5">
+<div class="container mt-4">
 
 <h2>Edit Candidate</h2>
 
-<form action="{{ route('candidates.update', $candidate) }}" method="POST">
+<form
 
-    @csrf
-    @method('PUT')
+ action="{{ route('candidates.update', $candidate) }}"
+method="POST"
+enctype="multipart/form-data">
 
-    <div class="mb-3">
+@csrf
+@method('PUT')
 
-        <label>Full Name</label>
+@include('candidates.form')
 
-        <input
-            type="text"
-            name="full_name"
-            class="form-control"
-            value="{{ old('full_name', $candidate->full_name) }}">
+<button class="btn btn-success">
 
-        @error('full_name')
-            <div class="text-danger">{{ $message }}</div>
-        @enderror
+Update
 
-    </div>
+</button>
 
-    <div class="mb-3">
+<a href="{{ route('candidates.index') }}"
+class="btn btn-secondary">
 
-        <label>Email</label>
+Back
 
-        <input
-            type="email"
-            name="email"
-            class="form-control"
-            value="{{ old('email', $candidate->email) }}">
-
-        @error('email')
-            <div class="text-danger">{{ $message }}</div>
-        @enderror
-
-    </div>
-
-    <div class="mb-3">
-
-        <label>Phone</label>
-
-        <input
-            type="text"
-            name="phone"
-            class="form-control"
-            value="{{ old('phone', $candidate->phone) }}">
-
-        @error('phone')
-            <div class="text-danger">{{ $message }}</div>
-        @enderror
-
-    </div>
-
-    <div class="mb-3">
-
-        <label>Status</label>
-
-        <select name="status" class="form-control">
-
-            <option value="Applied" {{ $candidate->status == 'Applied' ? 'selected' : '' }}>
-                Applied
-            </option>
-
-            <option value="Interview" {{ $candidate->status == 'Interview' ? 'selected' : '' }}>
-                Interview
-            </option>
-
-            <option value="Hired" {{ $candidate->status == 'Hired' ? 'selected' : '' }}>
-                Hired
-            </option>
-
-            <option value="Rejected" {{ $candidate->status == 'Rejected' ? 'selected' : '' }}>
-                Rejected
-            </option>
-
-        </select>
-
-    </div>
-
-    <button class="btn btn-success">
-        Update
-    </button>
-
-    <a href="{{ route('candidates.index') }}" class="btn btn-secondary">
-        Back
-    </a>
+</a>
 
 </form>
 
 </div>
 
-</body>
-</html>
+@endsection
