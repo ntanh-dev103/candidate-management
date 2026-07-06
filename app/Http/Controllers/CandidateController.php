@@ -160,17 +160,6 @@ public function update(UpdateCandidateRequest $request, Candidate $candidate)
      */
     public function destroy(Candidate $candidate)
 {
-    // Xóa avatar
-    if ($candidate->avatar_url) {
-        Storage::disk('public')->delete($candidate->avatar_url);
-    }
-
-    // Xóa CV
-    if ($candidate->cv_url) {
-        Storage::disk('public')->delete($candidate->cv_url);
-    }
-
-    // Xóa bản ghi
     $candidate->delete();
 
     return redirect()

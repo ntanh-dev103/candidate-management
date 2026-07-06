@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Candidate extends Model
 {
@@ -48,4 +49,17 @@ class Candidate extends Model
         'is_profile_complete' => 'boolean',
         'last_active_at' => 'datetime',
     ];
+
+    protected static function booted(): void
+    {
+        static::deleting(function (Candidate $candidate) {
+            if ($candidate->avatar_url) {
+                Storage::disk('public')->delete($candidate->avatar_url);
+            }
+
+            if ($candidate->cv_url) {
+                Storage::disk('public')->delete($candidate->cv_url);
+            }
+        });
+    }
 }
