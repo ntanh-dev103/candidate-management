@@ -9,6 +9,66 @@
     </div>
     <div class="card shadow-sm mb-4">
 
+        <div class="card-header bg-dark text-white">
+
+            <h5 class="mb-0">
+
+                Account
+
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label">
+
+                        Status <span class="text-danger">*</span>
+
+                    </label>
+
+                    <select name="status" class="form-select">
+
+                        <option value="Applied" {{ old('status', $candidate->status ?? '') == 'Applied' ? 'selected' : '' }}>Applied</option>
+
+                        <option value="Interview" {{ old('status', $candidate->status ?? '') == 'Interview' ? 'selected' : '' }}>Interview</option>
+
+                        <option value="Hired" {{ old('status', $candidate->status ?? '') == 'Hired' ? 'selected' : '' }}>Hired</option>
+
+                        <option value="Rejected" {{ old('status', $candidate->status ?? '') == 'Rejected' ? 'selected' : '' }}>Rejected</option>
+
+                    </select>
+
+                </div>
+
+                <div class="col-md-6 d-flex align-items-center">
+
+                    <div class="form-check mt-4">
+
+                        <input type="hidden" name="is_profile_complete" value="0">
+                        <input type="checkbox" class="form-check-input" name="is_profile_complete" value="1" {{ old('is_profile_complete', $candidate->is_profile_complete ?? false) ? 'checked' : '' }}>
+
+                        <label class="form-check-label">
+
+                            Profile Completed
+
+                        </label>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+    <div class="card shadow-sm mb-4">
+
         <div class="card-header bg-success text-white">
 
             <h5 class="mb-0">
@@ -112,7 +172,16 @@
 
                     <label>CV</label>
 
-                    <input type="file" name="cv" class="form-control">
+                    <input accept=".pdf,.doc,.docx" type="file" name="cv" class="form-control">
+
+                    @if (!empty($candidate->cv_url))
+                        <div class="mt-2">
+                            <small class="text-success d-block">Đã có CV hiện tại.</small>
+                            <a href="{{ Storage::url($candidate->cv_url) }}" target="_blank" rel="noopener">Xem CV đã upload</a>
+                        </div>
+                    @else
+                        <small class="text-muted d-block mt-2">Chưa có CV.</small>
+                    @endif
 
                 </div>
 
@@ -221,65 +290,6 @@
         </div>
 
     </div>
-    <div class="card shadow-sm mb-4">
-
-        <div class="card-header bg-dark text-white">
-
-            <h5 class="mb-0">
-
-                Account
-
-            </h5>
-
-        </div>
-
-        <div class="card-body">
-
-            <div class="row">
-
-                <div class="col-md-6 mb-3">
-
-                    <label class="form-label">
-
-                        Status
-
-                    </label>
-
-                    <select name="status" class="form-select">
-
-                        <option value="Applied" {{ old('status', $candidate->status ?? '') == 'Applied' ? 'selected' : '' }}>Applied</option>
-
-                        <option value="Interview" {{ old('status', $candidate->status ?? '') == 'Interview' ? 'selected' : '' }}>Interview</option>
-
-                        <option value="Hired" {{ old('status', $candidate->status ?? '') == 'Hired' ? 'selected' : '' }}>Hired</option>
-
-                        <option value="Rejected" {{ old('status', $candidate->status ?? '') == 'Rejected' ? 'selected' : '' }}>Rejected</option>
-
-                    </select>
-
-                </div>
-
-                <div class="col-md-6 d-flex align-items-center">
-
-                    <div class="form-check mt-4">
-
-                        <input type="checkbox" class="form-check-input" name="is_profile_complete" value="1" {{ old('is_profile_complete', $candidate->is_profile_complete ?? false) ? 'checked' : '' }}>
-
-                        <label class="form-check-label">
-
-                            Profile Completed
-
-                        </label>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
 
     <div class="card-body">
 
@@ -290,7 +300,7 @@
             <div class="col-md-6 mb-3">
 
                 <label class="form-label">
-                    Full Name
+                    Full Name <span class="text-danger">*</span>
                 </label>
 
                 <input type="text" name="full_name" class="form-control @error('full_name') is-invalid @enderror"
@@ -312,7 +322,7 @@
 
                 <label class="form-label">
 
-                    Email
+                    Email <span class="text-danger">*</span>
 
                 </label>
 
@@ -327,7 +337,7 @@
 
                 <label class="form-label">
 
-                    Phone
+                    Phone <span class="text-danger">*</span>
 
                 </label>
 
@@ -381,7 +391,15 @@
 
                 <label>Avatar</label>
 
-                <input type="file" name="avatar" class="form-control">
+                <input accept="image/*" type="file" name="avatar" class="form-control">
+
+                @if (!empty($candidate->avatar_url))
+                    <div class="mt-2">
+                        <small class="text-success d-block">Đã có avatar hiện tại: {{ pathinfo($candidate->avatar_url, PATHINFO_EXTENSION) }}</small>
+                    </div>
+                @else
+                    <small class="text-muted d-block mt-2">Chưa có avatar.</small>
+                @endif
 
             </div>
             <!-- Address -->

@@ -67,7 +67,11 @@ class StoreCandidateRequest extends FormRequest
 
             'current_job_title' => 'nullable|string|max:255',
 
-            'cv' => 'nullable|mimes:pdf|max:5120',
+            'skills' => 'nullable|string',
+
+            'languages' => 'nullable|string|max:255',
+
+            'cv' => 'nullable|mimes:pdf,doc,docx|max:5120',
 
 
             /*

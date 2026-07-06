@@ -19,7 +19,10 @@ public function index(Request $request)
     $query = Candidate::query();
 
     if ($request->search) {
-        $query->where('full_name', 'like', '%' . $request->search . '%');
+        $query->where(function ($subQuery) use ($request) {
+            $subQuery->where('phone', 'like', '%' . $request->search . '%')
+                ->orWhere('email', 'like', '%' . $request->search . '%');
+        });
     }
 
     if ($request->status) {

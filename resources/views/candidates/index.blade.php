@@ -47,7 +47,7 @@
                             type="text"
                             name="search"
                             class="form-control"
-                            placeholder="Search name..."
+                            placeholder="Search phone or email..."
                             value="{{ request('search') }}">
 
                     </div>
@@ -262,6 +262,8 @@
                     <th>Phone</th>
                     <th>Country</th>
                     <th>Experience</th>
+                    <th>Skills</th>
+                    <th>Languages</th>
                     <th>Status</th>
                     <th>CV</th>
                     <th width="220">
@@ -286,11 +288,9 @@
 
                             @if($candidate->avatar_url)
 
-                                <img
-                                    src="{{ asset('storage/'.$candidate->avatar_url) }}"
-                                    width="60"
-                                    height="60"
-                                    class="rounded-circle border">
+                                <span class="badge bg-info text-dark">
+                                    {{ pathinfo($candidate->avatar_url, PATHINFO_EXTENSION) }}
+                                </span>
 
                             @else
 
@@ -322,6 +322,38 @@
 
                             {{ $candidate->experience_years }}
                             years
+
+                        </td>
+
+                        <td>
+
+                            @if($candidate->skills)
+                                @foreach(explode(',', $candidate->skills) as $skill)
+                                    <span class="badge bg-primary me-1 mb-1">
+                                        {{ trim($skill) }}
+                                    </span>
+                                @endforeach
+                            @else
+                                <span class="text-muted">
+                                    No Skills
+                                </span>
+                            @endif
+
+                        </td>
+
+                        <td>
+
+                            @if($candidate->languages)
+                                @foreach(explode(',', $candidate->languages) as $language)
+                                    <span class="badge bg-success me-1 mb-1">
+                                        {{ trim($language) }}
+                                    </span>
+                                @endforeach
+                            @else
+                                <span class="text-muted">
+                                    No Languages
+                                </span>
+                            @endif
 
                         </td>
 
@@ -430,7 +462,7 @@
 
                     <tr>
 
-                        <td colspan="10" class="text-center">
+                        <td colspan="12" class="text-center">
 
                             No candidates found.
 

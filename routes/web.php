@@ -26,7 +26,7 @@ Route::prefix('candidates')->name('candidates.')->group(function () {
     Route::put('/update/{candidate}', [CandidateController::class, 'update'])->name('update');
 
     // Xóa
-    Route::get('/delete/{candidate}', [CandidateController::class, 'destroy'])->name('destroy');
+    Route::delete('/delete/{candidate}', [CandidateController::class, 'destroy'])->name('destroy');
 
     // Chi tiết (nếu cần)
     Route::get('/show/{candidate}', [CandidateController::class, 'show'])->name('show');

@@ -22,20 +22,21 @@
                     <div class="col-md-3 text-center">
 
                         @if ($candidate->avatar_url)
-                            <img src="{{ $candidate->avatar_url
-                                ? asset('storage/' . $candidate->avatar_url)
-                                : 'https://ui-avatars.com/api/?name=' . urlencode($candidate->full_name) . '&background=0D8ABC&color=fff' }}"
-                                class="rounded-circle shadow border" width="180" height="180">
+                            <div class="border rounded-circle d-inline-flex align-items-center justify-content-center bg-light shadow" style="width:180px;height:180px;">
+                                <span class="fw-bold text-uppercase fs-3">
+                                    {{ pathinfo($candidate->avatar_url, PATHINFO_EXTENSION) }}
+                                </span>
+                            </div>
                         @else
-                            <img src="https://via.placeholder.com/200" class="img-fluid rounded-circle">
+                            <div class="border rounded-circle d-inline-flex align-items-center justify-content-center bg-light" style="width:180px;height:180px;">
+                                <span class="text-muted">No Avatar</span>
+                            </div>
                         @endif
 
                         <h4 class="mt-3">
-
                             {{ $candidate->full_name }}
-
-
                         </h4>
+
                         @if ($candidate->is_profile_complete)
                             <span class="badge bg-success">
                                 Profile Completed
@@ -45,7 +46,8 @@
                                 Profile Incomplete
                             </span>
                         @endif
-                        <div class="mb-3">
+
+                        <div class="mb-3 mt-2">
 
                             @for ($i = 1; $i <= 5; $i++)
                                 @if ($i <= $candidate->rating)
@@ -58,9 +60,7 @@
                         </div>
 
                         <p class="text-muted">
-
                             {{ $candidate->headline }}
-
                         </p>
 
                         @switch($candidate->status)
@@ -68,19 +68,19 @@
                                 <span class="badge bg-secondary">
                                     Applied
                                 </span>
-                            @break
+                                @break
 
                             @case('Interview')
-                                <span class="badge bg-warning">
+                                <span class="badge bg-warning text-dark">
                                     Interview
                                 </span>
-                            @break
+                                @break
 
                             @case('Hired')
                                 <span class="badge bg-success">
                                     Hired
                                 </span>
-                            @break
+                                @break
 
                             @default
                                 <span class="badge bg-danger">
@@ -97,18 +97,14 @@
                         <h4>
                             Personal Information
                         </h4>
-                        <tr>
-
-                            <th>Last Active</th>
-
-                            <td>
-
-                                {{ $candidate->last_active_at ? \Carbon\Carbon::parse($candidate->last_active_at)->diffForHumans() : 'Never' }}
-
-                            </td>
-
-                        </tr>
                         <table class="table table-bordered">
+
+                            <tr>
+                                <th width="30%">Last Active</th>
+                                <td>
+                                    {{ $candidate->last_active_at ? \Carbon\Carbon::parse($candidate->last_active_at)->diffForHumans() : 'Never' }}
+                                </td>
+                            </tr>
 
                             <tr>
                                 <th width="30%">Email</th>
@@ -186,50 +182,41 @@
                         </h4>
                         <hr>
 
-                        <h4>
+                        <div class="mb-3">
+                            <h5 class="mb-2">
+                                Skills
+                            </h5>
 
-                            Skills
-
-                        </h4>
-                        <hr>
-
-                        <h4>
-
-                            Languages
-
-                        </h4>
-
-                        @if ($candidate->languages)
-                            @foreach (explode(',', $candidate->languages) as $language)
-                                <span class="badge bg-success me-1 mb-1">
-
-                                    {{ trim($language) }}
-
+                            @if ($candidate->skills)
+                                @foreach (explode(',', $candidate->skills) as $skill)
+                                    <span class="badge bg-primary me-1 mb-1">
+                                        {{ trim($skill) }}
+                                    </span>
+                                @endforeach
+                            @else
+                                <span class="text-muted">
+                                    No Skills
                                 </span>
-                            @endforeach
-                        @else
-                            <span class="text-muted">
+                            @endif
+                        </div>
 
-                                No Languages
+                        <div class="mb-3">
+                            <h5 class="mb-2">
+                                Languages
+                            </h5>
 
-                            </span>
-                        @endif
-
-                        @if ($candidate->skills)
-                            @foreach (explode(',', $candidate->skills) as $skill)
-                                <span class="badge bg-primary me-1 mb-1">
-
-                                    {{ trim($skill) }}
-
+                            @if ($candidate->languages)
+                                @foreach (explode(',', $candidate->languages) as $language)
+                                    <span class="badge bg-success me-1 mb-1">
+                                        {{ trim($language) }}
+                                    </span>
+                                @endforeach
+                            @else
+                                <span class="text-muted">
+                                    No Languages
                                 </span>
-                            @endforeach
-                        @else
-                            <span class="text-muted">
-
-                                No Skills
-
-                            </span>
-                        @endif
+                            @endif
+                        </div>
 
                         <table class="table table-bordered">
 
