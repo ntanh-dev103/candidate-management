@@ -46,7 +46,7 @@ class StoreCandidateRequest extends FormRequest
 
             'gender' => 'nullable|in:male,female,other',
 
-            'avatar_base64' => 'nullable|string',
+            'avatar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
 
             'address' => 'nullable|string|max:255',
 
@@ -71,7 +71,7 @@ class StoreCandidateRequest extends FormRequest
 
             'languages' => 'nullable|string|max:255',
 
-            'cv_url' => 'nullable|string|max:255',
+            'cv' => 'nullable|mimes:pdf,doc,docx|max:5120',
 
 
             /*
