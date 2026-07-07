@@ -142,7 +142,7 @@
 
             <div class="col-md-12 mb-3">
                 <label class="form-label">CV (PDF, max 5MB)</label>
-                <input id="cvFilepond" type="file" class="form-control">
+                <input id="cvFilepond" name="file" type="file" class="form-control">
                 <input id="cvPath" type="hidden" name="cv_url" value="{{ old('cv_url', $candidate->cv_url ?? '') }}">
                 <small id="cvUploadHint" class="text-muted d-block mt-2">
                     {{ !empty($candidate->cv_url) ? 'CV hien tai: ' . basename($candidate->cv_url) : 'Chua co CV.' }}
