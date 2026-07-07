@@ -18,6 +18,15 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
           rel="stylesheet">
 
+    {{-- UI Plugins --}}
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.4.1/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/filepond@^4/dist/filepond.css" rel="stylesheet">
+
+    @stack('styles')
+
 </head>
 
 <body class="bg-light">
@@ -122,6 +131,31 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.4.1/dist/js/tom-select.complete.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
+<script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
+<script src="https://unpkg.com/filepond-plugin-file-validate-type/dist/filepond-plugin-file-validate-type.min.js"></script>
+<script src="https://unpkg.com/filepond-plugin-file-validate-size/dist/filepond-plugin-file-validate-size.min.js"></script>
+<script src="https://unpkg.com/filepond@^4/dist/filepond.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (!window.TomSelect) {
+            return;
+        }
+
+        document.querySelectorAll('.js-tom-select').forEach(function (element) {
+            if (!element.tomselect) {
+                new TomSelect(element, {
+                    create: false,
+                    allowEmptyOption: true,
+                    maxOptions: null,
+                });
+            }
+        });
+    });
+</script>
+@stack('scripts')
 </body>
 
 </html>
