@@ -57,7 +57,7 @@
 
                         <select
                             name="status"
-                            class="form-select">
+                            class="form-select js-tom-select">
 
                             <option value="">Status</option>
 
@@ -82,7 +82,7 @@
 
                         <select
                             name="gender"
-                            class="form-select">
+                            class="form-select js-tom-select">
 
                             <option value="">Gender</option>
 
@@ -110,7 +110,7 @@
 
                         <select
                             name="country"
-                            class="form-select">
+                            class="form-select js-tom-select">
 
                             <option value="">Current Country</option>
 
@@ -135,7 +135,7 @@
 
                         <select
                             name="desired_country"
-                            class="form-select">
+                            class="form-select js-tom-select">
 
                             <option value="">Desired Country</option>
 
@@ -160,7 +160,7 @@
 
                         <select
                             name="education"
-                            class="form-select">
+                            class="form-select js-tom-select">
 
                             <option value="">Education</option>
 
@@ -193,7 +193,7 @@
 
                         <select
                             name="experience"
-                            class="form-select">
+                            class="form-select js-tom-select">
 
                             <option value="">Experience</option>
 

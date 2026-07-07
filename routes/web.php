@@ -10,6 +10,9 @@ Route::get('/', [DashboardController::class, 'index'])
 
 Route::prefix('candidates')->name('candidates.')->group(function () {
 
+    // Upload CV async
+    Route::post('/upload/cv', [CandidateController::class, 'uploadCv'])->name('upload-cv');
+
     // Danh sách ứng viên
     Route::get('/', [CandidateController::class, 'index'])->name('index');
 
