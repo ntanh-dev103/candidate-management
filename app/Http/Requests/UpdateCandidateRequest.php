@@ -42,7 +42,7 @@ class UpdateCandidateRequest extends FormRequest
 
             'gender' => 'nullable|in:male,female,other',
 
-            'avatar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'avatar_base64' => 'nullable|string',
 
             'address' => 'nullable|string|max:255',
 
@@ -61,7 +61,7 @@ class UpdateCandidateRequest extends FormRequest
 
             'languages' => 'nullable|string|max:255',
 
-            'cv' => 'nullable|mimes:pdf,doc,docx|max:5120',
+            'cv_url' => 'nullable|string|max:255',
 
             // Career
             'desired_country' => 'nullable|in:JP,KR,DE,TW',
