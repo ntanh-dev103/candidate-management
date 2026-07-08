@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CandidateController;
+use App\Http\Controllers\CandidateActivationController;
 
 // Trang chủ
 Route::get('/', [DashboardController::class, 'index'])
@@ -38,3 +39,7 @@ Route::prefix('candidates')->name('candidates.')->group(function () {
 Route::get('/test-view', function () {
     return view('candidates.index');
 });
+
+Route::get('/candidates/activate/{candidate}', CandidateActivationController::class)
+    ->middleware('signed')
+    ->name('candidates.activate');

@@ -17,6 +17,9 @@ class Candidate extends Model
         'phone',
         'status',
 
+        'activation_sent_at',
+        'activated_at',
+
         'date_of_birth',
         'gender',
         'avatar_url',
@@ -47,6 +50,8 @@ class Candidate extends Model
         'experience_years' => 'integer',
         'desired_salary_min' => 'decimal:2',
         'is_profile_complete' => 'boolean',
+        'activation_sent_at' => 'datetime',
+        'activated_at' => 'datetime',
         'last_active_at' => 'datetime',
     ];
 

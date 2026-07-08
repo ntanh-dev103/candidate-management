@@ -19,7 +19,14 @@
 
             <div class="col-md-6 mb-3">
                 <label class="form-label">Email <span class="text-danger">*</span></label>
-                <input type="email" name="email" class="form-control" value="{{ old('email', $candidate->email ?? '') }}">
+                <input
+                    type="email"
+                    name="email"
+                    class="form-control @error('email') is-invalid @enderror"
+                    value="{{ old('email', $candidate->email ?? '') }}">
+                @error('email')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
             </div>
 
             <div class="col-md-6 mb-3">

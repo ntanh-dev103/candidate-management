@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\CandidateAccountCreated;
 use App\Http\Requests\StoreCandidateRequest;
 use App\Http\Requests\UpdateCandidateRequest;
 use App\Models\Candidate;
@@ -87,7 +88,9 @@ class CandidateController extends Controller
             $data['cv_url'] = null;
         }
 
-        Candidate::create($data);
+        $candidate = Candidate::create($data);
+
+        CandidateAccountCreated::dispatch($candidate->id);
 
         return redirect()
             ->route('candidates.index')

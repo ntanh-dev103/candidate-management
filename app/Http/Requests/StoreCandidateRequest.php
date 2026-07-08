@@ -6,6 +6,13 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class StoreCandidateRequest extends FormRequest
 {
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'email' => $this->filled('email') ? strtolower(trim((string) $this->input('email'))) : null,
+        ]);
+    }
+
     /**
      * Authorize the request.
      */

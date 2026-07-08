@@ -7,6 +7,13 @@ use Illuminate\Validation\Rule;
 
 class UpdateCandidateRequest extends FormRequest
 {
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'email' => $this->filled('email') ? strtolower(trim((string) $this->input('email'))) : null,
+        ]);
+    }
+
     /**
      * Determine if the user is authorized to make this request.
      */
