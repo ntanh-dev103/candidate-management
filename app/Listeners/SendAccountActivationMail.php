@@ -22,7 +22,7 @@ class SendAccountActivationMail implements ShouldQueue
             return;
         }
 
-        $expiresAt = now()->addHours(48);
+        $expiresAt = now()->addMinutes(5);
         $activationUrl = URL::temporarySignedRoute(
             'candidates.activate',
             $expiresAt,
@@ -37,7 +37,7 @@ class SendAccountActivationMail implements ShouldQueue
             new CandidateAccountActivationMail(
                 candidate: $candidate,
                 activationUrl: $activationUrl,
-                expiresAt: $expiresAt->format('d/m/Y H:i')
+                expiresAt: $expiresAt->format('d/m/Y H:i:s')
             )
         );
     }

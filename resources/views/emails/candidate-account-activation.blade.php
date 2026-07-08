@@ -27,7 +27,7 @@
                 <tr>
                     <td style="padding:34px 32px 28px;">
                         <p style="margin:0 0 14px;font-size:16px;line-height:1.75;color:#111827;">Xin chào <strong>{{ $candidate->full_name }}</strong>,</p>
-                        <p style="margin:0 0 22px;font-size:15px;line-height:1.75;color:#4b5563;">Đội ngũ tuyển dụng của {{ config('app.name') }} vừa tạo cho bạn một tài khoản ứng viên. Vui lòng kích hoạt trong vòng <strong>48 giờ</strong> để đảm bảo liên kết còn hiệu lực.</p>
+                        <p style="margin:0 0 22px;font-size:15px;line-height:1.75;color:#4b5563;">Đội ngũ tuyển dụng của {{ config('app.name') }} vừa tạo cho bạn một tài khoản ứng viên. Vui lòng kích hoạt trong vòng <strong>5 phút</strong> để đảm bảo liên kết còn hiệu lực.</p>
 
                         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:18px;margin-bottom:22px;">
                             <tr>
@@ -53,7 +53,7 @@
                         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:4px;border-top:1px solid #e5e7eb;">
                             <tr>
                                 <td style="padding-top:18px;">
-                                    <p style="margin:0 0 10px;font-size:14px;line-height:1.7;color:#6b7280;">Nếu bạn không yêu cầu tài khoản này, vui lòng bỏ qua email. Liên kết kích hoạt sẽ hết hạn sau 48 giờ và không thể sử dụng lại.</p>
+                                    <p style="margin:0 0 10px;font-size:14px;line-height:1.7;color:#6b7280;">Nếu bạn không yêu cầu tài khoản này, vui lòng bỏ qua email. Liên kết kích hoạt sẽ hết hạn sau 5 phút.</p>
                                     <p style="margin:0;font-size:14px;line-height:1.7;color:#111827;">Trân trọng,<br><strong>{{ config('app.name') }}</strong></p>
                                 </td>
                             </tr>
