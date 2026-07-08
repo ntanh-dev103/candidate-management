@@ -235,15 +235,20 @@
 </div>
 
 <div class="modal fade" id="avatarCropModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable" style="max-width: 1400px; width: 96vw;">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Crop Avatar</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <div style="max-height: 70vh; overflow: hidden;">
-                    <img id="cropperImage" src="" alt="Crop source" style="max-width: 100%; display: block;">
+            <div class="modal-body" style="max-height: 82vh; background: #f8f9fa;">
+                <div style="width: 100%; height: min(72vh, 680px); display: flex; align-items: center; justify-content: center; overflow: hidden; background: #ffffff; border: 1px solid #dee2e6; border-radius: 16px; padding: 12px;">
+                    <img id="cropperImage" src="" alt="Crop source" style="max-width: 100%; max-height: 100%; display: block;">
+                </div>
+
+                <div class="mt-3 px-1">
+                    <label for="avatarZoomRange" class="form-label mb-2">Zoom</label>
+                    <input id="avatarZoomRange" type="range" class="form-range" min="0.5" max="4" step="0.01" value="1">
                 </div>
             </div>
             <div class="modal-footer">
@@ -292,6 +297,7 @@
                 var avatarPreview = document.getElementById('avatarPreview');
                 var avatarHint = document.getElementById('avatarHint');
                 var cropperImage = document.getElementById('cropperImage');
+                var avatarZoomRange = document.getElementById('avatarZoomRange');
                 var cropModalEl = document.getElementById('avatarCropModal');
                 var cropModal = cropModalEl ? new bootstrap.Modal(cropModalEl) : null;
                 var cropperInstance = null;
@@ -316,8 +322,11 @@
                                 aspectRatio: 1,
                                 viewMode: 1,
                                 dragMode: 'move',
-                                autoCropArea: 1,
+                                autoCropArea: 0.8,
                                 responsive: true,
+                                ready: function () {
+                                    avatarZoomRange.value = '1';
+                                }
                             });
                         };
                     };
@@ -347,12 +356,21 @@
                     cropperInstance = null;
                 });
 
+                avatarZoomRange.addEventListener('input', function () {
+                    if (!cropperInstance) {
+                        return;
+                    }
+
+                    cropperInstance.zoomTo(parseFloat(this.value));
+                });
+
                 cropModalEl.addEventListener('hidden.bs.modal', function () {
                     if (cropperInstance) {
                         cropperInstance.destroy();
                         cropperInstance = null;
                     }
                     avatarInput.value = '';
+                    avatarZoomRange.value = '1';
                 });
 
                 if (window.FilePond) {
