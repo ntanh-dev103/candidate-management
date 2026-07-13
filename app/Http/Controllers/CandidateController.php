@@ -11,6 +11,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use App\Models\Experience;
+use App\Models\Education;
+use App\Models\Skill;
 
 class CandidateController extends Controller
 {
@@ -19,7 +22,7 @@ class CandidateController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Candidate::query();
+        $query = Candidate::with('skills');
 
         if ($request->search) {
             $query->where(function ($subQuery) use ($request) {
@@ -67,6 +70,9 @@ class CandidateController extends Controller
     {
         return view('candidates.create', [
             'candidate' => new Candidate(),
+            'experiences' => Experience::all(),
+            'educations' => Education::all(),
+            'skills' => Skill::orderBy('name')->get(),
         ]);
     }
 
@@ -74,30 +80,39 @@ class CandidateController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(StoreCandidateRequest $request)
-    {
+{
+    $data = $request->validated();
 
-        $data = $request->validated();
+    // Relationship
+    $skillIds = $data['skill_ids'] ?? [];
+    unset($data['skill_ids']);
 
-        $avatarBase64 = $data['avatar_base64'] ?? null;
-        
-        unset($data['avatar_base64']);
+    // Avatar
+    $avatarBase64 = $data['avatar_base64'] ?? null;
+    unset($data['avatar_base64']);
 
-        if ($avatarBase64) {
-            $data['avatar_url'] = $this->storeAvatarFromBase64($avatarBase64);
-        }
-
-        if (array_key_exists('cv_url', $data) && empty($data['cv_url'])) {
-            $data['cv_url'] = null;
-        }
-
-        $candidate = Candidate::create($data);
-
-        CandidateAccountCreated::dispatch($candidate->id);
-
-        return redirect()
-            ->route('candidates.index')
-            ->with('success', 'Candidate created successfully.');
+    if ($avatarBase64) {
+        $data['avatar_url'] = $this->storeAvatarFromBase64($avatarBase64);
     }
+
+    // CV
+    if (array_key_exists('cv_url', $data) && empty($data['cv_url'])) {
+        $data['cv_url'] = null;
+    }
+
+    // Tạo Candidate
+    $candidate = Candidate::create($data);
+
+    // Lưu quan hệ Skill
+    $candidate->skills()->sync($skillIds);
+
+    // Gửi event mail
+    CandidateAccountCreated::dispatch($candidate->id);
+
+    return redirect()
+        ->route('candidates.index')
+        ->with('success', 'Candidate created successfully.');
+}
 
     /**
      * Handle async CV upload for FilePond.
@@ -122,7 +137,13 @@ class CandidateController extends Controller
      */
     public function show(Candidate $candidate)
     {
-        return view('candidates.show', compact('candidate'));
+         $candidate->load([
+        'experiences',
+        'educations',
+        'skills',
+    ]);
+
+    return view('candidates.show', compact('candidate'));
     }
 
     /**
@@ -130,7 +151,18 @@ class CandidateController extends Controller
      */
     public function edit(Candidate $candidate)
     {
-        return view('candidates.edit', compact('candidate'));
+        $candidate->load([
+            'experiences',
+            'educations',
+            'skills',
+        ]);
+
+        return view('candidates.edit', [
+            'candidate' => $candidate,
+            'experiences' => Experience::all(),
+            'educations' => Education::all(),
+            'skills' => Skill::orderBy('name')->get(),
+        ]);
     }
 
     /**
@@ -140,28 +172,56 @@ class CandidateController extends Controller
     {
         $data = $request->validated();
 
+        // Lấy dữ liệu relationship ra khỏi dữ liệu Candidate
+        $skillIds = $data['skill_ids'] ?? [];
+
+        unset($data['skill_ids']);
+
+        // ==========================
+        // UPDATE AVATAR
+        // ==========================
         $avatarBase64 = $data['avatar_base64'] ?? null;
+
         unset($data['avatar_base64']);
 
         if ($avatarBase64) {
+
             if ($candidate->avatar_url) {
-                Storage::disk('public')->delete($candidate->avatar_url);
+                Storage::disk('public')
+                    ->delete($candidate->avatar_url);
             }
 
-            $data['avatar_url'] = $this->storeAvatarFromBase64($avatarBase64);
+            $data['avatar_url'] =
+                $this->storeAvatarFromBase64($avatarBase64);
         }
 
+        // ==========================
+        // UPDATE CV
+        // ==========================
         if (array_key_exists('cv_url', $data)) {
+
             $newCvPath = $data['cv_url'] ?: null;
 
-            if ($candidate->cv_url && $candidate->cv_url !== $newCvPath) {
-                Storage::disk('public')->delete($candidate->cv_url);
+            if (
+                $candidate->cv_url &&
+                $candidate->cv_url !== $newCvPath
+            ) {
+                Storage::disk('public')
+                    ->delete($candidate->cv_url);
             }
 
             $data['cv_url'] = $newCvPath;
         }
 
+        // ==========================
+        // UPDATE CANDIDATE
+        // ==========================
         $candidate->update($data);
+
+        // ==========================
+        // UPDATE SKILLS RELATIONSHIP
+        // ==========================
+        $candidate->skills()->sync($skillIds);
 
         return redirect()
             ->route('candidates.index')

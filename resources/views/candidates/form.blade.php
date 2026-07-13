@@ -125,16 +125,38 @@
                 <input type="text" name="current_job_title" class="form-control" value="{{ old('current_job_title', $candidate->current_job_title ?? '') }}">
             </div>
 
-            <div class="col-md-6 mb-3">
-                <label class="form-label">Skills</label>
-                <input
-                    id="skillsInput"
-                    type="text"
-                    name="skills"
-                    class="form-control"
-                    value="{{ old('skills', $candidate->skills ?? '') }}"
-                    placeholder="Java, Laravel, Docker">
-            </div>
+            <div class="mb-3">
+    <label class="form-label">Skills</label>
+
+    <select
+        name="skill_ids[]"
+        class="form-select"
+        multiple
+    >
+        @foreach ($skills as $skill)
+            <option
+                value="{{ $skill->id }}"
+                @selected(
+                    in_array(
+                        $skill->id,
+                        old(
+                            'skill_ids',
+                            isset($candidate)
+                                ? $candidate->skills->pluck('id')->toArray()
+                                : []
+                        )
+                    )
+                )
+            >
+                {{ $skill->name }}
+            </option>
+        @endforeach
+    </select>
+
+    @error('skill_ids')
+        <div class="text-danger">{{ $message }}</div>
+    @enderror
+</div>
 
             <div class="col-md-6 mb-3">
                 <label class="form-label">Languages</label>

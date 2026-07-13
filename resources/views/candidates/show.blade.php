@@ -1,291 +1,445 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container mt-4">
+<div class="container mt-4">
 
-        <div class="card shadow">
+    <div class="card shadow">
 
-            <div class="card-header bg-primary text-white">
+        {{-- ================= HEADER ================= --}}
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">Candidate Profile</h3>
+        </div>
 
-                <h3 class="mb-0">
-                    Candidate Profile
-                </h3>
+        <div class="card-body">
 
-            </div>
+            <div class="row">
 
-            <div class="card-body">
+                {{-- ================= LEFT: AVATAR ================= --}}
+                <div class="col-md-3 text-center">
 
-                <div class="row">
+                    @if ($candidate->avatar_url)
+                        <img
+                            src="{{ asset('storage/' . $candidate->avatar_url) }}"
+                            alt="{{ $candidate->full_name }}"
+                            class="rounded-circle shadow border"
+                            width="180"
+                            height="180"
+                            style="object-fit: cover;"
+                        >
+                    @else
+                        <div
+                            class="border rounded-circle d-inline-flex
+                                   align-items-center justify-content-center bg-light"
+                            style="width:180px;height:180px;"
+                        >
+                            <span class="text-muted">No Avatar</span>
+                        </div>
+                    @endif
 
-                    <!-- Avatar -->
+                    {{-- Candidate Name --}}
+                    <h4 class="mt-3">
+                        {{ $candidate->full_name }}
+                    </h4>
 
-                    <div class="col-md-3 text-center">
+                    {{-- Profile Status --}}
+                    @if ($candidate->is_profile_complete)
+                        <span class="badge bg-success">
+                            Profile Completed
+                        </span>
+                    @else
+                        <span class="badge bg-danger">
+                            Profile Incomplete
+                        </span>
+                    @endif
 
-                        @if ($candidate->avatar_url)
-                            <div class="border rounded-circle d-inline-flex align-items-center justify-content-center bg-light shadow" style="width:180px;height:180px;">
-                                <span class="fw-bold text-uppercase fs-3">
-                                    {{ pathinfo($candidate->avatar_url, PATHINFO_EXTENSION) }}
+                    {{-- Rating --}}
+                    <div class="mb-3 mt-2">
+                        @for ($i = 1; $i <= 5; $i++)
+                            @if ($i <= ($candidate->rating ?? 0))
+                                ⭐
+                            @else
+                                ☆
+                            @endif
+                        @endfor
+                    </div>
+
+                    {{-- Headline --}}
+                    <p class="text-muted">
+                        {{ $candidate->headline ?? 'No headline' }}
+                    </p>
+
+                    {{-- Candidate Status --}}
+                    @switch($candidate->status)
+
+                        @case('Applied')
+                            <span class="badge bg-secondary">Applied</span>
+                            @break
+
+                        @case('Interview')
+                            <span class="badge bg-warning text-dark">
+                                Interview
+                            </span>
+                            @break
+
+                        @case('Hired')
+                            <span class="badge bg-success">Hired</span>
+                            @break
+
+                        @case('Rejected')
+                            <span class="badge bg-danger">Rejected</span>
+                            @break
+
+                        @default
+                            <span class="badge bg-secondary">
+                                {{ $candidate->status ?? 'Unknown' }}
+                            </span>
+
+                    @endswitch
+
+                </div>
+
+                {{-- ================= RIGHT: PROFILE ================= --}}
+                <div class="col-md-9">
+
+                    {{-- ================= PERSONAL INFORMATION ================= --}}
+                    <h4>Personal Information</h4>
+
+                    <table class="table table-bordered">
+
+                        <tr>
+                            <th width="30%">Last Active</th>
+                            <td>
+                                {{ $candidate->last_active_at
+                                    ? \Carbon\Carbon::parse($candidate->last_active_at)->diffForHumans()
+                                    : 'Never'
+                                }}
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th>Email</th>
+                            <td>{{ $candidate->email ?? 'N/A' }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>Phone</th>
+                            <td>{{ $candidate->phone ?? 'N/A' }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>Date of Birth</th>
+                            <td>
+                                {{ $candidate->date_of_birth ?? 'N/A' }}
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th>Gender</th>
+                            <td>
+                                {{ $candidate->gender
+                                    ? ucfirst($candidate->gender)
+                                    : 'N/A'
+                                }}
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th>Address</th>
+                            <td>{{ $candidate->address ?? 'N/A' }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>Current Country</th>
+                            <td>
+                                {{ $candidate->current_country ?? 'N/A' }}
+                            </td>
+                        </tr>
+
+                    </table>
+
+
+                    {{-- ================= EXPERIENCE ================= --}}
+                    <h4 class="mt-4">
+                        Work Experience
+                    </h4>
+
+                    <div class="card mb-4">
+                        <div class="card-body">
+
+                            @forelse ($candidate->experiences as $experience)
+
+                                <div class="mb-3">
+
+                                    <h5 class="mb-1">
+                                        {{ $experience->job_title ?? 'No Job Title' }}
+                                    </h5>
+
+                                    <div>
+                                        <strong>Company:</strong>
+                                        {{ $experience->company_name ?? 'N/A' }}
+                                    </div>
+
+                                    <div class="text-muted">
+
+                                        {{ $experience->start_date ?? 'N/A' }}
+
+                                        -
+
+                                        {{ $experience->end_date ?? 'Present' }}
+
+                                    </div>
+
+                                    @if ($experience->description)
+                                        <p class="mt-2 mb-0">
+                                            {{ $experience->description }}
+                                        </p>
+                                    @endif
+
+                                </div>
+
+                                @unless ($loop->last)
+                                    <hr>
+                                @endunless
+
+                            @empty
+
+                                <span class="text-muted">
+                                    No Experience
                                 </span>
-                            </div>
-                        @else
-                            <div class="border rounded-circle d-inline-flex align-items-center justify-content-center bg-light" style="width:180px;height:180px;">
-                                <span class="text-muted">No Avatar</span>
-                            </div>
-                        @endif
 
-                        <h4 class="mt-3">
-                            {{ $candidate->full_name }}
-                        </h4>
-
-                        @if ($candidate->is_profile_complete)
-                            <span class="badge bg-success">
-                                Profile Completed
-                            </span>
-                        @else
-                            <span class="badge bg-danger">
-                                Profile Incomplete
-                            </span>
-                        @endif
-
-                        <div class="mb-3 mt-2">
-
-                            @for ($i = 1; $i <= 5; $i++)
-                                @if ($i <= $candidate->rating)
-                                    ⭐
-                                @else
-                                    ☆
-                                @endif
-                            @endfor
+                            @endforelse
 
                         </div>
+                    </div>
 
-                        <p class="text-muted">
-                            {{ $candidate->headline }}
-                        </p>
 
-                        @switch($candidate->status)
-                            @case('Applied')
-                                <span class="badge bg-secondary">
-                                    Applied
+                    {{-- ================= EDUCATION ================= --}}
+                    <h4 class="mt-4">
+                        Education
+                    </h4>
+
+                    <div class="card mb-4">
+                        <div class="card-body">
+
+                            @forelse ($candidate->educations as $education)
+
+                                <div class="mb-3">
+
+                                    <h5 class="mb-1">
+                                        {{ $education->school_name ?? 'No School Name' }}
+                                    </h5>
+
+                                    <div>
+                                        <strong>Degree:</strong>
+                                        {{ $education->degree ?? 'N/A' }}
+                                    </div>
+
+                                    @if ($education->field_of_study)
+                                        <div>
+                                            <strong>Field of Study:</strong>
+                                            {{ $education->field_of_study }}
+                                        </div>
+                                    @endif
+
+                                    <div class="text-muted">
+
+                                        {{ $education->start_date ?? 'N/A' }}
+
+                                        -
+
+                                        {{ $education->end_date ?? 'Present' }}
+
+                                    </div>
+
+                                </div>
+
+                                @unless ($loop->last)
+                                    <hr>
+                                @endunless
+
+                            @empty
+
+                                <span class="text-muted">
+                                    No Education
                                 </span>
-                                @break
 
-                            @case('Interview')
-                                <span class="badge bg-warning text-dark">
-                                    Interview
-                                </span>
-                                @break
+                            @endforelse
 
-                            @case('Hired')
-                                <span class="badge bg-success">
-                                    Hired
-                                </span>
-                                @break
+                        </div>
+                    </div>
 
-                            @default
-                                <span class="badge bg-danger">
-                                    Rejected
-                                </span>
-                        @endswitch
+
+                    {{-- ================= CURRENT JOB ================= --}}
+                    <h4 class="mt-4">
+                        Professional Information
+                    </h4>
+
+                    <table class="table table-bordered">
+
+                        <tr>
+                            <th width="30%">Current Job</th>
+                            <td>
+                                {{ $candidate->current_job_title ?? 'N/A' }}
+                            </td>
+                        </tr>
+
+                    </table>
+
+
+                    {{-- ================= SKILLS ================= --}}
+                    <h4 class="mt-4">
+                        Career Goal
+                    </h4>
+
+                    <hr>
+
+                    <div class="mb-3">
+
+                        <h5 class="mb-2">
+                            Skills
+                        </h5>
+
+                        @forelse ($candidate->skills as $skill)
+
+                            <span class="badge bg-primary me-1 mb-1">
+                                {{ $skill->name }}
+                            </span>
+
+                        @empty
+
+                            <span class="text-muted">
+                                No Skills
+                            </span>
+
+                        @endforelse
 
                     </div>
 
-                    <!-- Profile -->
 
-                    <div class="col-md-9">
+                    {{-- ================= LANGUAGES ================= --}}
+                    <div class="mb-3">
 
-                        <h4>
-                            Personal Information
-                        </h4>
-                        <table class="table table-bordered">
+                        <h5 class="mb-2">
+                            Languages
+                        </h5>
 
-                            <tr>
-                                <th width="30%">Last Active</th>
-                                <td>
-                                    {{ $candidate->last_active_at ? \Carbon\Carbon::parse($candidate->last_active_at)->diffForHumans() : 'Never' }}
-                                </td>
-                            </tr>
+                        @if ($candidate->languages)
 
-                            <tr>
-                                <th width="30%">Email</th>
-                                <td>{{ $candidate->email }}</td>
-                            </tr>
+                            @foreach (explode(',', $candidate->languages) as $language)
 
-                            <tr>
-                                <th>Phone</th>
-                                <td>{{ $candidate->phone }}</td>
-                            </tr>
-
-                            <tr>
-                                <th>Date of Birth</th>
-                                <td>{{ $candidate->date_of_birth }}</td>
-                            </tr>
-
-                            <tr>
-                                <th>Gender</th>
-                                <td>{{ ucfirst($candidate->gender) }}</td>
-                            </tr>
-
-                            <tr>
-                                <th>Address</th>
-                                <td>{{ $candidate->address }}</td>
-                            </tr>
-
-                            <tr>
-                                <th>Current Country</th>
-                                <td>{{ $candidate->current_country }}</td>
-                            </tr>
-
-                        </table>
-
-                        <h4 class="mt-4">
-                            Professional Information
-                        </h4>
-
-                        <table class="table table-bordered">
-
-                            <tr>
-                                <th width="30%">Experience</th>
-                                <td>
-
-                                    {{ $candidate->experience_years }}
-
-                                    years
-
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <th>Education</th>
-                                <td>
-
-                                    {{ $candidate->education_level }}
-
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <th>Current Job</th>
-                                <td>
-
-                                    {{ $candidate->current_job_title }}
-
-                                </td>
-                            </tr>
-
-                        </table>
-
-                        <h4 class="mt-4">
-
-                            Career Goal
-
-                        </h4>
-                        <hr>
-
-                        <div class="mb-3">
-                            <h5 class="mb-2">
-                                Skills
-                            </h5>
-
-                            @if ($candidate->skills)
-                                @foreach (explode(',', $candidate->skills) as $skill)
-                                    <span class="badge bg-primary me-1 mb-1">
-                                        {{ trim($skill) }}
-                                    </span>
-                                @endforeach
-                            @else
-                                <span class="text-muted">
-                                    No Skills
+                                <span class="badge bg-success me-1 mb-1">
+                                    {{ trim($language) }}
                                 </span>
-                            @endif
-                        </div>
 
-                        <div class="mb-3">
-                            <h5 class="mb-2">
-                                Languages
-                            </h5>
+                            @endforeach
 
-                            @if ($candidate->languages)
-                                @foreach (explode(',', $candidate->languages) as $language)
-                                    <span class="badge bg-success me-1 mb-1">
-                                        {{ trim($language) }}
-                                    </span>
-                                @endforeach
-                            @else
-                                <span class="text-muted">
-                                    No Languages
-                                </span>
-                            @endif
-                        </div>
+                        @else
 
-                        <table class="table table-bordered">
+                            <span class="text-muted">
+                                No Languages
+                            </span>
 
-                            <tr>
-                                <th width="30%">Desired Country</th>
-                                <td>
+                        @endif
 
-                                    {{ $candidate->desired_country }}
+                    </div>
 
-                                </td>
-                            </tr>
 
-                            <tr>
-                                <th>Job Type</th>
-                                <td>
+                    {{-- ================= CAREER GOAL ================= --}}
+                    <table class="table table-bordered">
 
-                                    {{ $candidate->desired_job_type }}
+                        <tr>
+                            <th width="30%">
+                                Desired Country
+                            </th>
 
-                                </td>
-                            </tr>
+                            <td>
+                                {{ $candidate->desired_country ?? 'N/A' }}
+                            </td>
+                        </tr>
 
-                            <tr>
-                                <th>Salary</th>
-                                <td>
+                        <tr>
+                            <th>
+                                Job Type
+                            </th>
+
+                            <td>
+                                {{ $candidate->desired_job_type ?? 'N/A' }}
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th>
+                                Salary
+                            </th>
+
+                            <td>
+
+                                @if ($candidate->desired_salary_min)
 
                                     {{ number_format($candidate->desired_salary_min) }}
 
                                     {{ $candidate->desired_salary_currency }}
 
-                                </td>
-                            </tr>
+                                @else
 
-                        </table>
+                                    N/A
 
-                        <h4 class="mt-4">
+                                @endif
 
-                            CV
+                            </td>
+                        </tr>
 
-                        </h4>
+                    </table>
 
-                        @if ($candidate->cv_url)
-                            <a href="{{ asset('storage/' . $candidate->cv_url) }}" target="_blank" class="btn btn-success">
 
-                                View CV
+                    {{-- ================= CV ================= --}}
+                    <h4 class="mt-4">
+                        CV
+                    </h4>
 
-                            </a>
+                    @if ($candidate->cv_url)
 
-                            <a href="{{ asset('storage/' . $candidate->cv_url) }}" download class="btn btn-primary">
-
-                                Download CV
-
-                            </a>
-                        @else
-                            <span class="text-muted">
-
-                                No CV uploaded
-
-                            </span>
-                        @endif
-
-                        <hr>
-
-                        <a href="{{ route('candidates.index') }}" class="btn btn-secondary">
-
-                            Back
-
+                        <a
+                            href="{{ asset('storage/' . $candidate->cv_url) }}"
+                            target="_blank"
+                            class="btn btn-success"
+                        >
+                            View CV
                         </a>
 
-                    </div>
+                        <a
+                            href="{{ asset('storage/' . $candidate->cv_url) }}"
+                            download
+                            class="btn btn-primary"
+                        >
+                            Download CV
+                        </a>
+
+                    @else
+
+                        <span class="text-muted">
+                            No CV uploaded
+                        </span>
+
+                    @endif
+
+
+                    <hr>
+
+                    {{-- ================= ACTION BUTTONS ================= --}}
+                    <a
+                        href="{{ route('candidates.index') }}"
+                        class="btn btn-secondary"
+                    >
+                        Back
+                    </a>
+
+                    <a
+                        href="{{ route('candidates.edit', $candidate) }}"
+                        class="btn btn-warning"
+                    >
+                        Edit
+                    </a>
 
                 </div>
 
@@ -294,4 +448,6 @@
         </div>
 
     </div>
-@endsection
+
+</div>
+@endsection 

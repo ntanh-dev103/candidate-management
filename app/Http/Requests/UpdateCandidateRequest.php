@@ -64,8 +64,8 @@ class UpdateCandidateRequest extends FormRequest
 
             'current_job_title' => 'nullable|string|max:255',
 
-            'skills' => 'nullable|string',
-
+            'skill_ids' => ['nullable', 'array'],
+            'skill_ids.*' => ['integer', 'exists:skills,id'],
             'languages' => 'nullable|string|max:255',
 
             'cv_url' => 'nullable|string|max:255',

@@ -5,6 +5,11 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CandidateController;
 use App\Http\Controllers\CandidateActivationController;
 
+// Thêm 3 Controller mới
+use App\Http\Controllers\ExperienceController;
+use App\Http\Controllers\EducationController;
+use App\Http\Controllers\SkillController;
+
 // Trang chủ
 Route::get('/', [DashboardController::class, 'index'])
     ->name('dashboard');
@@ -34,6 +39,37 @@ Route::prefix('candidates')->name('candidates.')->group(function () {
 
     // Chi tiết (nếu cần)
     Route::get('/show/{candidate}', [CandidateController::class, 'show'])->name('show');
+    // ==============================
+    // EXPERIENCE CRUD
+    // ==============================
+
+    Route::resource('experiences', ExperienceController::class);
+
+
+    // ==============================
+    // EDUCATION CRUD
+    // ==============================
+
+    Route::resource('educations', EducationController::class);
+
+
+    // ==============================
+    // SKILL CRUD
+    // ==============================
+
+    Route::resource('skills', SkillController::class);
+
+
+    // ==============================
+    // CANDIDATE ACTIVATION
+    // ==============================
+
+    Route::get(
+        '/candidates/activate/{candidate}',
+        CandidateActivationController::class
+    )
+        ->middleware('signed')
+        ->name('candidates.activate');
 });
 
 Route::get('/test-view', function () {
