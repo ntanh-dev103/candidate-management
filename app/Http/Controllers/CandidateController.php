@@ -75,9 +75,11 @@ class CandidateController extends Controller
      */
     public function store(StoreCandidateRequest $request)
     {
+
         $data = $request->validated();
 
         $avatarBase64 = $data['avatar_base64'] ?? null;
+        
         unset($data['avatar_base64']);
 
         if ($avatarBase64) {
@@ -200,6 +202,7 @@ class CandidateController extends Controller
         }
 
         $path = 'avatars/' . Str::uuid() . '.' . $extension;
+
         Storage::disk('public')->put($path, $binary);
 
         return $path;
