@@ -1,11 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DashboardController;  // Trang chủ
 use App\Http\Controllers\CandidateController;
 use App\Http\Controllers\CandidateActivationController;
-
-// Thêm 3 Controller mới
 use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\EducationController;
 use App\Http\Controllers\SkillController;

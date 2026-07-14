@@ -80,39 +80,39 @@ class CandidateController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(StoreCandidateRequest $request)
-{
-    $data = $request->validated();
+    {
+        $data = $request->validated();
 
-    // Relationship
-    $skillIds = $data['skill_ids'] ?? [];
-    unset($data['skill_ids']);
+        // Relationship
+        $skillIds = $data['skill_ids'] ?? [];
+        unset($data['skill_ids']);
 
-    // Avatar
-    $avatarBase64 = $data['avatar_base64'] ?? null;
-    unset($data['avatar_base64']);
+        // Avatar
+        $avatarBase64 = $data['avatar_base64'] ?? null;
+        unset($data['avatar_base64']);
 
-    if ($avatarBase64) {
-        $data['avatar_url'] = $this->storeAvatarFromBase64($avatarBase64);
+        if ($avatarBase64) {
+            $data['avatar_url'] = $this->storeAvatarFromBase64($avatarBase64);
+        }
+
+        // CV
+        if (array_key_exists('cv_url', $data) && empty($data['cv_url'])) {
+            $data['cv_url'] = null;
+        }
+
+        // Tạo Candidate
+        $candidate = Candidate::create($data);
+
+        // Lưu quan hệ Skill
+        $candidate->skills()->sync($skillIds);
+
+        // Gửi event mail
+        CandidateAccountCreated::dispatch($candidate->id);
+
+        return redirect()
+            ->route('candidates.index')
+            ->with('success', 'Candidate created successfully.');
     }
-
-    // CV
-    if (array_key_exists('cv_url', $data) && empty($data['cv_url'])) {
-        $data['cv_url'] = null;
-    }
-
-    // Tạo Candidate
-    $candidate = Candidate::create($data);
-
-    // Lưu quan hệ Skill
-    $candidate->skills()->sync($skillIds);
-
-    // Gửi event mail
-    CandidateAccountCreated::dispatch($candidate->id);
-
-    return redirect()
-        ->route('candidates.index')
-        ->with('success', 'Candidate created successfully.');
-}
 
     /**
      * Handle async CV upload for FilePond.
@@ -137,13 +137,13 @@ class CandidateController extends Controller
      */
     public function show(Candidate $candidate)
     {
-         $candidate->load([
-        'experiences',
-        'educations',
-        'skills',
-    ]);
+        $candidate->load([
+            'experiences',
+            'educations',
+            'skills',
+        ]);
 
-    return view('candidates.show', compact('candidate'));
+        return view('candidates.show', compact('candidate'));
     }
 
     /**
@@ -221,11 +221,22 @@ class CandidateController extends Controller
         // ==========================
         // UPDATE SKILLS RELATIONSHIP
         // ==========================
-        $candidate->skills()->sync($skillIds);
+        $skillNames = $data['skills'] ?? [];
+        unset($data['skills']);
 
-        return redirect()
-            ->route('candidates.index')
-            ->with('success', 'Candidate updated successfully.');
+        $skillIds = [];
+
+        foreach ($skillNames as $skillName) {
+            $skill = Skill::firstOrCreate([
+                'name' => trim($skillName),
+            ]);
+
+            $skillIds[] = $skill->id;
+        }
+
+        $candidate->update($data);
+
+        $candidate->skills()->sync($skillIds);
     }
 
     /**
