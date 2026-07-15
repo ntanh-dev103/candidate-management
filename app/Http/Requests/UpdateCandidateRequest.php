@@ -7,15 +7,22 @@ use Illuminate\Validation\Rule;
 
 class UpdateCandidateRequest extends FormRequest
 {
+    /**
+     * Chuẩn hóa dữ liệu trước khi validate
+     */
     protected function prepareForValidation(): void
     {
         $this->merge([
-            'email' => $this->filled('email') ? strtolower(trim((string) $this->input('email'))) : null,
+            'email' => $this->filled('email')
+                ? strtolower(trim((string) $this->input('email')))
+                : null,
+
+            'skill_ids' => $this->input('skill_ids', []),
         ]);
     }
 
     /**
-     * Determine if the user is authorized to make this request.
+     * Cho phép request được thực thi
      */
     public function authorize(): bool
     {
@@ -23,7 +30,7 @@ class UpdateCandidateRequest extends FormRequest
     }
 
     /**
-     * Validation Rules
+     * Validation rules
      */
     public function rules(): array
     {
@@ -31,57 +38,197 @@ class UpdateCandidateRequest extends FormRequest
 
         return [
 
-            // Basic
-            'full_name' => 'required|max:255',
+            // ==========================================
+            // BASIC INFORMATION
+            // ==========================================
+
+            'full_name' => [
+                'required',
+                'string',
+                'max:255',
+            ],
 
             'email' => [
                 'required',
                 'email',
-                Rule::unique('candidates')->ignore($candidate),
+                'max:255',
+                Rule::unique('candidates', 'email')
+                    ->ignore($candidate),
             ],
 
-            'phone' => 'required|max:20',
+            'phone' => [
+                'required',
+                'string',
+                'max:20',
+            ],
 
-            'status' => 'required|in:Applied,Interview,Hired,Rejected',
+            'status' => [
+                'required',
+                Rule::in([
+                    'Applied',
+                    'Interview',
+                    'Hired',
+                    'Rejected',
+                ]),
+            ],
 
-            // Personal
-            'date_of_birth' => 'nullable|date',
+            // ==========================================
+            // PERSONAL INFORMATION
+            // ==========================================
 
-            'gender' => 'nullable|in:male,female,other',
+            'date_of_birth' => [
+                'nullable',
+                'date',
+            ],
 
-            'avatar_base64' => 'nullable|string',
+            'gender' => [
+                'nullable',
+                Rule::in([
+                    'male',
+                    'female',
+                    'other',
+                ]),
+            ],
 
-            'address' => 'nullable|string|max:255',
+            'avatar_base64' => [
+                'nullable',
+                'string',
+            ],
 
-            'current_country' => 'nullable|in:VN,JP,KR,TW,DE',
+            'address' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
 
-            // Professional
-            'headline' => 'nullable|string|max:255',
+            'current_country' => [
+                'nullable',
+                Rule::in([
+                    'VN',
+                    'JP',
+                    'KR',
+                    'TW',
+                    'DE',
+                ]),
+            ],
 
-            'experience_years' => 'nullable|integer|min:0|max:50',
+            // ==========================================
+            // PROFESSIONAL PROFILE
+            // ==========================================
 
-            'education_level' => 'nullable|in:high_school,college,bachelor,master',
+            'headline' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
 
-            'current_job_title' => 'nullable|string|max:255',
+            'experience_years' => [
+                'nullable',
+                'integer',
+                'min:0',
+                'max:50',
+            ],
 
-            'skill_ids' => ['nullable', 'array'],
-            'skill_ids.*' => ['integer', 'exists:skills,id'],
-            'languages' => 'nullable|string|max:255',
+            'education_level' => [
+                'nullable',
+                Rule::in([
+                    'high_school',
+                    'college',
+                    'bachelor',
+                    'master',
+                ]),
+            ],
 
-            'cv_url' => 'nullable|string|max:255',
+            'current_job_title' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
 
-            // Career
-            'desired_country' => 'nullable|in:JP,KR,DE,TW',
+            // ==========================================
+            // SKILLS
+            // ==========================================
+            // Cho phép:
+            // skill_ids[] = 1       -> Skill đã có
+            // skill_ids[] = Laravel -> Skill mới từ Tom Select
 
-            'desired_job_type' => 'nullable|in:full_time,part_time,contract',
+            'skill_ids' => [
+                'nullable',
+                'array',
+            ],
 
-            'desired_salary_min' => 'nullable|numeric|min:0',
+            'skill_ids.*' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
 
-            'desired_salary_currency' => 'nullable|in:JPY,VND,USD',
+            // ==========================================
+            // LANGUAGES
+            // ==========================================
 
-            // Account
-            'is_profile_complete' => 'nullable|boolean',
+            'languages' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
 
+            // ==========================================
+            // CV
+            // ==========================================
+
+            'cv_url' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
+            // ==========================================
+            // CAREER GOAL
+            // ==========================================
+
+            'desired_country' => [
+                'nullable',
+                Rule::in([
+                    'JP',
+                    'KR',
+                    'DE',
+                    'TW',
+                ]),
+            ],
+
+            'desired_job_type' => [
+                'nullable',
+                Rule::in([
+                    'full_time',
+                    'part_time',
+                    'contract',
+                ]),
+            ],
+
+            'desired_salary_min' => [
+                'nullable',
+                'numeric',
+                'min:0',
+            ],
+
+            'desired_salary_currency' => [
+                'nullable',
+                Rule::in([
+                    'JPY',
+                    'VND',
+                    'USD',
+                ]),
+            ],
+
+            // ==========================================
+            // ACCOUNT
+            // ==========================================
+
+            'is_profile_complete' => [
+                'nullable',
+                'boolean',
+            ],
         ];
     }
 }

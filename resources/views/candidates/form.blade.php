@@ -298,9 +298,10 @@
             </div>
 
 
-            {{-- =================================================
-                SKILLS - TOM SELECT MULTIPLE
-            ================================================== --}}
+
+            {{-- =========================================================
+    SKILLS - TOM SELECT MULTIPLE
+========================================================= --}}
             <div class="col-md-6 mb-3">
 
                 <label for="skillsInput" class="form-label">
@@ -310,26 +311,36 @@
                 @php
                     /*
         |--------------------------------------------------------------------------
-        | Lấy danh sách skill đã chọn
+        | LẤY DANH SÁCH SKILL ĐÃ CHỌN
         |--------------------------------------------------------------------------
-        | Create:
-        | - Lấy từ old('skills')
         |
-        | Edit:
-        | - Lấy tên skill hiện tại của Candidate
+        | Khi validation lỗi:
+        | - Lấy lại dữ liệu từ old('skill_ids')
+        |
+        | Khi Edit:
+        | - Lấy ID các skill hiện tại của Candidate
+        |
+        | Khi Create:
+        | - Mảng rỗng
+        |
         */
-                    $selectedSkills = old(
-                        'skills',
-                        isset($candidate) && $candidate->exists ? $candidate->skills->pluck('name')->toArray() : [],
+
+                    $selectedSkillIds = old(
+                        'skill_ids',
+                        isset($candidate) && $candidate->exists ? $candidate->skills->pluck('id')->toArray() : [],
                     );
+
+                    // Chuyển tất cả ID thành string để so sánh chính xác
+                    $selectedSkillIds = array_map('strval', $selectedSkillIds);
                 @endphp
 
-                <select id="skillsInput" name="skills[]" multiple autocomplete="off"
-                    placeholder="Select or create skills...">
 
-                    {{-- Danh sách skill đã có trong database --}}
+                <select id="skillsInput" name="skill_ids[]" multiple autocomplete="off"
+                    placeholder="Select skills..." class="@error('skill_ids') is-invalid @enderror">
+
+                    {{-- Danh sách Skill lấy từ bảng skills --}}
                     @foreach ($skills as $skill)
-                        <option value="{{ $skill->name }}" @selected(in_array($skill->name, $selectedSkills, true))>
+                        <option value="{{ $skill->id }}" @selected(in_array((string) $skill->id, $selectedSkillIds, true))>
                             {{ $skill->name }}
                         </option>
                     @endforeach
@@ -337,16 +348,16 @@
                 </select>
 
 
-                {{-- Validation lỗi của mảng skills --}}
-                @error('skills')
+                {{-- Lỗi của mảng skill_ids --}}
+                @error('skill_ids')
                     <div class="text-danger mt-1">
                         {{ $message }}
                     </div>
                 @enderror
 
 
-                {{-- Validation lỗi từng skill --}}
-                @error('skills.*')
+                {{-- Lỗi của từng skill ID --}}
+                @error('skill_ids.*')
                     <div class="text-danger mt-1">
                         {{ $message }}
                     </div>
@@ -363,8 +374,7 @@
                 </label>
 
                 <input id="languagesInput" type="text" name="languages" class="form-control"
-                    value="{{ old('languages', $candidate->languages ?? '') }}"
-                    placeholder="Vietnamese, English">
+                    value="{{ old('languages', $candidate->languages ?? '') }}" placeholder="Vietnamese, English">
 
             </div>
 

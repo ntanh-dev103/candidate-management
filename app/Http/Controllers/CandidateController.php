@@ -168,76 +168,99 @@ class CandidateController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateCandidateRequest $request, Candidate $candidate)
-    {
-        $data = $request->validated();
+    public function update(
+    UpdateCandidateRequest $request,
+    Candidate $candidate
+) {
+    $data = $request->validated();
 
-        // Lấy dữ liệu relationship ra khỏi dữ liệu Candidate
-        $skillIds = $data['skill_ids'] ?? [];
+    // ==========================
+    // LẤY DỮ LIỆU SKILLS
+    // Có thể chứa ID cũ hoặc tên skill mới
+    // ==========================
+    $skillValues = $data['skill_ids'] ?? [];
 
-        unset($data['skill_ids']);
+    unset($data['skill_ids']);
 
-        // ==========================
-        // UPDATE AVATAR
-        // ==========================
-        $avatarBase64 = $data['avatar_base64'] ?? null;
+    // ==========================
+    // UPDATE AVATAR
+    // ==========================
+    $avatarBase64 = $data['avatar_base64'] ?? null;
 
-        unset($data['avatar_base64']);
+    unset($data['avatar_base64']);
 
-        if ($avatarBase64) {
+    if ($avatarBase64) {
 
-            if ($candidate->avatar_url) {
-                Storage::disk('public')
-                    ->delete($candidate->avatar_url);
-            }
-
-            $data['avatar_url'] =
-                $this->storeAvatarFromBase64($avatarBase64);
+        if ($candidate->avatar_url) {
+            Storage::disk('public')
+                ->delete($candidate->avatar_url);
         }
 
-        // ==========================
-        // UPDATE CV
-        // ==========================
-        if (array_key_exists('cv_url', $data)) {
-
-            $newCvPath = $data['cv_url'] ?: null;
-
-            if (
-                $candidate->cv_url &&
-                $candidate->cv_url !== $newCvPath
-            ) {
-                Storage::disk('public')
-                    ->delete($candidate->cv_url);
-            }
-
-            $data['cv_url'] = $newCvPath;
-        }
-
-        // ==========================
-        // UPDATE CANDIDATE
-        // ==========================
-        $candidate->update($data);
-
-        // ==========================
-        // UPDATE SKILLS RELATIONSHIP
-        // ==========================
-        $skillNames = $data['skills'] ?? [];
-        unset($data['skills']);
-
-        $skillIds = [];
-
-        foreach ($skillNames as $skillName) {
-            $skill = Skill::firstOrCreate([
-                'name' => trim($skillName),
-            ]);
-
-            $skillIds[] = $skill->id;
-        }
-
-        $candidate->update($data);
-
-        $candidate->skills()->sync($skillIds);
+        $data['avatar_url'] =
+            $this->storeAvatarFromBase64($avatarBase64);
     }
+
+    // ==========================
+    // UPDATE CV
+    // ==========================
+    if (array_key_exists('cv_url', $data)) {
+
+        $newCvPath = $data['cv_url'] ?: null;
+
+        if (
+            $candidate->cv_url &&
+            $candidate->cv_url !== $newCvPath
+        ) {
+            Storage::disk('public')
+                ->delete($candidate->cv_url);
+        }
+
+        $data['cv_url'] = $newCvPath;
+    }
+
+    // ==========================
+    // UPDATE CANDIDATE
+    // ==========================
+    $candidate->update($data);
+
+    // ==========================
+    // XỬ LÝ SKILL CŨ + SKILL MỚI
+    // ==========================
+    $skillIds = [];
+
+    foreach ($skillValues as $value) {
+
+        // Skill đã tồn tại → value là ID
+        if (is_numeric($value)) {
+            $skillIds[] = (int) $value;
+            continue;
+        }
+
+        // Skill mới → tạo trong bảng skills
+        $skill = Skill::firstOrCreate([
+            'name' => trim($value),
+        ]);
+
+        // Lấy ID của skill vừa tạo/tìm thấy
+        $skillIds[] = $skill->id;
+    }
+
+    // ==========================
+    // UPDATE BẢNG TRUNG GIAN
+    // candidate_skill
+    // ==========================
+    $candidate->skills()->sync($skillIds);
+
+    // ==========================
+    // REDIRECT
+    // ==========================
+    return redirect()
+        ->route('candidates.index')
+        ->with(
+            'success',
+            'Candidate updated successfully.'
+        );
+}
 
     /**
      * Remove the specified resource from storage.
