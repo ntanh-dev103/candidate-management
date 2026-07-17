@@ -17,7 +17,6 @@
         </a>
 
     </div>
-
     <!-- Success -->
     @if(session('success'))
 
@@ -327,17 +326,15 @@
 
                         <td>
 
-                            @if($candidate->skills)
-                                @foreach(explode(',', $candidate->skills) as $skill)
-                                    <span class="badge bg-primary me-1 mb-1">
-                                        {{ trim($skill) }}
-                                    </span>
-                                @endforeach
-                            @else
-                                <span class="text-muted">
-                                    No Skills
-                                </span>
-                            @endif
+                            @forelse($candidate->skills as $skill)
+        <span class="badge bg-primary me-1 mb-1">
+            {{ $skill->name }}
+        </span>
+    @empty
+        <span class="text-muted">
+            No Skills
+        </span>
+    @endforelse
 
                         </td>
 

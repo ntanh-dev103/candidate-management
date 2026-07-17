@@ -11,6 +11,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use App\Models\Experience;
+use App\Models\Education;
+use App\Models\Skill;
 
 class CandidateController extends Controller
 {
@@ -19,7 +22,7 @@ class CandidateController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Candidate::query();
+        $query = Candidate::with('skills');
 
         if ($request->search) {
             $query->where(function ($subQuery) use ($request) {
@@ -67,6 +70,9 @@ class CandidateController extends Controller
     {
         return view('candidates.create', [
             'candidate' => new Candidate(),
+            'experiences' => Experience::all(),
+            'educations' => Education::all(),
+            'skills' => Skill::orderBy('name')->get(),
         ]);
     }
 
@@ -75,23 +81,32 @@ class CandidateController extends Controller
      */
     public function store(StoreCandidateRequest $request)
     {
-
         $data = $request->validated();
 
+        // Relationship
+        $skillIds = $data['skill_ids'] ?? [];
+        unset($data['skill_ids']);
+
+        // Avatar
         $avatarBase64 = $data['avatar_base64'] ?? null;
-        
         unset($data['avatar_base64']);
 
         if ($avatarBase64) {
             $data['avatar_url'] = $this->storeAvatarFromBase64($avatarBase64);
         }
 
+        // CV
         if (array_key_exists('cv_url', $data) && empty($data['cv_url'])) {
             $data['cv_url'] = null;
         }
 
+        // Tạo Candidate
         $candidate = Candidate::create($data);
 
+        // Lưu quan hệ Skill
+        $candidate->skills()->sync($skillIds);
+
+        // Gửi event mail
         CandidateAccountCreated::dispatch($candidate->id);
 
         return redirect()
@@ -122,6 +137,12 @@ class CandidateController extends Controller
      */
     public function show(Candidate $candidate)
     {
+        $candidate->load([
+            'experiences',
+            'educations',
+            'skills',
+        ]);
+
         return view('candidates.show', compact('candidate'));
     }
 
@@ -130,43 +151,116 @@ class CandidateController extends Controller
      */
     public function edit(Candidate $candidate)
     {
-        return view('candidates.edit', compact('candidate'));
+        $candidate->load([
+            'experiences',
+            'educations',
+            'skills',
+        ]);
+
+        return view('candidates.edit', [
+            'candidate' => $candidate,
+            'experiences' => Experience::all(),
+            'educations' => Education::all(),
+            'skills' => Skill::orderBy('name')->get(),
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateCandidateRequest $request, Candidate $candidate)
-    {
-        $data = $request->validated();
+    public function update(
+    UpdateCandidateRequest $request,
+    Candidate $candidate
+) {
+    $data = $request->validated();
 
-        $avatarBase64 = $data['avatar_base64'] ?? null;
-        unset($data['avatar_base64']);
+    // ==========================
+    // LẤY DỮ LIỆU SKILLS
+    // Có thể chứa ID cũ hoặc tên skill mới
+    // ==========================
+    $skillValues = $data['skill_ids'] ?? [];
 
-        if ($avatarBase64) {
-            if ($candidate->avatar_url) {
-                Storage::disk('public')->delete($candidate->avatar_url);
-            }
+    unset($data['skill_ids']);
 
-            $data['avatar_url'] = $this->storeAvatarFromBase64($avatarBase64);
+    // ==========================
+    // UPDATE AVATAR
+    // ==========================
+    $avatarBase64 = $data['avatar_base64'] ?? null;
+
+    unset($data['avatar_base64']);
+
+    if ($avatarBase64) {
+
+        if ($candidate->avatar_url) {
+            Storage::disk('public')
+                ->delete($candidate->avatar_url);
         }
 
-        if (array_key_exists('cv_url', $data)) {
-            $newCvPath = $data['cv_url'] ?: null;
-
-            if ($candidate->cv_url && $candidate->cv_url !== $newCvPath) {
-                Storage::disk('public')->delete($candidate->cv_url);
-            }
-
-            $data['cv_url'] = $newCvPath;
-        }
-
-        $candidate->update($data);
-
-        return redirect()
-            ->route('candidates.index')
-            ->with('success', 'Candidate updated successfully.');
+        $data['avatar_url'] =
+            $this->storeAvatarFromBase64($avatarBase64);
     }
+
+    // ==========================
+    // UPDATE CV
+    // ==========================
+    if (array_key_exists('cv_url', $data)) {
+
+        $newCvPath = $data['cv_url'] ?: null;
+
+        if (
+            $candidate->cv_url &&
+            $candidate->cv_url !== $newCvPath
+        ) {
+            Storage::disk('public')
+                ->delete($candidate->cv_url);
+        }
+
+        $data['cv_url'] = $newCvPath;
+    }
+
+    // ==========================
+    // UPDATE CANDIDATE
+    // ==========================
+    $candidate->update($data);
+
+    // ==========================
+    // XỬ LÝ SKILL CŨ + SKILL MỚI
+    // ==========================
+    $skillIds = [];
+
+    foreach ($skillValues as $value) {
+
+        // Skill đã tồn tại → value là ID
+        if (is_numeric($value)) {
+            $skillIds[] = (int) $value;
+            continue;
+        }
+
+        // Skill mới → tạo trong bảng skills
+        $skill = Skill::firstOrCreate([
+            'name' => trim($value),
+        ]);
+
+        // Lấy ID của skill vừa tạo/tìm thấy
+        $skillIds[] = $skill->id;
+    }
+
+    // ==========================
+    // UPDATE BẢNG TRUNG GIAN
+    // candidate_skill
+    // ==========================
+    $candidate->skills()->sync($skillIds);
+
+    // ==========================
+    // REDIRECT
+    // ==========================
+    return redirect()
+        ->route('candidates.index')
+        ->with(
+            'success',
+            'Candidate updated successfully.'
+        );
+}
 
     /**
      * Remove the specified resource from storage.

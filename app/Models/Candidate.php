@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Candidate extends Model
 {
@@ -40,7 +42,7 @@ class Candidate extends Model
         'is_profile_complete',
         'last_active_at',
         'rating',
-        'skills',
+        
 
         'languages',
     ];
@@ -66,5 +68,19 @@ class Candidate extends Model
                 Storage::disk('public')->delete($candidate->cv_url);
             }
         });
+    }
+    public function experiences(): HasMany
+    {
+        return $this->hasMany(Experience::class);
+    }
+
+    public function educations(): HasMany
+    {
+        return $this->hasMany(Education::class);
+    }
+
+    public function skills(): BelongsToMany
+    {
+        return $this->belongsToMany(Skill::class);
     }
 }

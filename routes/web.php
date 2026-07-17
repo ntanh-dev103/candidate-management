@@ -1,45 +1,118 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CandidateController;
 use App\Http\Controllers\CandidateActivationController;
+use App\Http\Controllers\ExperienceController;
+use App\Http\Controllers\EducationController;
+use App\Http\Controllers\SkillController;
 
-// Trang chủ
+
+// ==========================================
+// DASHBOARD
+// ==========================================
+
 Route::get('/', [DashboardController::class, 'index'])
     ->name('dashboard');
 
-Route::prefix('candidates')->name('candidates.')->group(function () {
 
-    // Upload CV async
-    Route::post('/upload/cv', [CandidateController::class, 'uploadCv'])->name('upload-cv');
+// ==========================================
+// CANDIDATE CRUD
+// ==========================================
 
-    // Danh sách ứng viên
-    Route::get('/', [CandidateController::class, 'index'])->name('index');
+Route::prefix('candidates')
+    ->name('candidates.')
+    ->group(function () {
 
-    // Form thêm
-    Route::get('/add', [CandidateController::class, 'create'])->name('create');
+        // Upload CV
+        Route::post(
+            '/upload/cv',
+            [CandidateController::class, 'uploadCv']
+        )->name('upload-cv');
 
-    // Lưu dữ liệu
-    Route::post('/store', [CandidateController::class, 'store'])->name('store');
+        // Danh sách Candidate
+        Route::get(
+            '/',
+            [CandidateController::class, 'index']
+        )->name('index');
 
-    // Form sửa
-    Route::get('/edit/{candidate}', [CandidateController::class, 'edit'])->name('edit');
+        // Form thêm Candidate
+        Route::get(
+            '/add',
+            [CandidateController::class, 'create']
+        )->name('create');
 
-    // Cập nhật
-    Route::put('/update/{candidate}', [CandidateController::class, 'update'])->name('update');
+        // Lưu Candidate
+        Route::post(
+            '/store',
+            [CandidateController::class, 'store']
+        )->name('store');
 
-    // Xóa
-    Route::delete('/delete/{candidate}', [CandidateController::class, 'destroy'])->name('destroy');
+        // Form sửa Candidate
+        Route::get(
+            '/edit/{candidate}',
+            [CandidateController::class, 'edit']
+        )->name('edit');
 
-    // Chi tiết (nếu cần)
-    Route::get('/show/{candidate}', [CandidateController::class, 'show'])->name('show');
-});
+        // Update Candidate
+        Route::put(
+            '/update/{candidate}',
+            [CandidateController::class, 'update']
+        )->name('update');
 
-Route::get('/test-view', function () {
-    return view('candidates.index');
-});
+        // Xóa Candidate
+        Route::delete(
+            '/delete/{candidate}',
+            [CandidateController::class, 'destroy']
+        )->name('destroy');
 
-Route::get('/candidates/activate/{candidate}', CandidateActivationController::class)
+        // Chi tiết Candidate
+        Route::get(
+            '/show/{candidate}',
+            [CandidateController::class, 'show']
+        )->name('show');
+    });
+
+
+// ==========================================
+// EXPERIENCE CRUD
+// ==========================================
+
+Route::resource(
+    'experiences',
+    ExperienceController::class
+);
+
+
+// ==========================================
+// EDUCATION CRUD
+// ==========================================
+
+Route::resource(
+    'educations',
+    EducationController::class
+);
+
+
+// ==========================================
+// SKILL CRUD
+// ==========================================
+
+Route::resource(
+    'skills',
+    SkillController::class
+);
+
+
+// ==========================================
+// CANDIDATE ACTIVATION
+// ==========================================
+
+Route::get(
+    '/candidates/activate/{candidate}',
+    CandidateActivationController::class
+)
     ->middleware('signed')
     ->name('candidates.activate');
