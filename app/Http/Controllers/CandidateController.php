@@ -14,6 +14,13 @@ use Illuminate\Validation\ValidationException;
 use App\Models\Experience;
 use App\Models\Education;
 use App\Models\Skill;
+use App\Exports\CandidateExport;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Http\Controllers\CandidateExportController;
+use App\Jobs\ExportCandidatesJob;
+use App\Jobs\GenerateCandidateAvatarJob;
+use App\Imports\CandidateImport;
+
 
 class CandidateController extends Controller
 {
@@ -106,6 +113,11 @@ class CandidateController extends Controller
         // Lưu quan hệ Skill
         $candidate->skills()->sync($skillIds);
 
+        // Nếu không upload avatar thì sinh avatar mặc định
+        if (empty($candidate->avatar_url)) {
+            GenerateCandidateAvatarJob::dispatch($candidate);
+        }
+
         // Gửi event mail
         CandidateAccountCreated::dispatch($candidate->id);
 
@@ -169,98 +181,98 @@ class CandidateController extends Controller
      * Update the specified resource in storage.
      */
     public function update(
-    UpdateCandidateRequest $request,
-    Candidate $candidate
-) {
-    $data = $request->validated();
+        UpdateCandidateRequest $request,
+        Candidate $candidate
+    ) {
+        $data = $request->validated();
 
-    // ==========================
-    // LẤY DỮ LIỆU SKILLS
-    // Có thể chứa ID cũ hoặc tên skill mới
-    // ==========================
-    $skillValues = $data['skill_ids'] ?? [];
+        // ==========================
+        // LẤY DỮ LIỆU SKILLS
+        // Có thể chứa ID cũ hoặc tên skill mới
+        // ==========================
+        $skillValues = $data['skill_ids'] ?? [];
 
-    unset($data['skill_ids']);
+        unset($data['skill_ids']);
 
-    // ==========================
-    // UPDATE AVATAR
-    // ==========================
-    $avatarBase64 = $data['avatar_base64'] ?? null;
+        // ==========================
+        // UPDATE AVATAR
+        // ==========================
+        $avatarBase64 = $data['avatar_base64'] ?? null;
 
-    unset($data['avatar_base64']);
+        unset($data['avatar_base64']);
 
-    if ($avatarBase64) {
+        if ($avatarBase64) {
 
-        if ($candidate->avatar_url) {
-            Storage::disk('public')
-                ->delete($candidate->avatar_url);
+            if ($candidate->avatar_url) {
+                Storage::disk('public')
+                    ->delete($candidate->avatar_url);
+            }
+
+            $data['avatar_url'] =
+                $this->storeAvatarFromBase64($avatarBase64);
         }
 
-        $data['avatar_url'] =
-            $this->storeAvatarFromBase64($avatarBase64);
-    }
+        // ==========================
+        // UPDATE CV
+        // ==========================
+        if (array_key_exists('cv_url', $data)) {
 
-    // ==========================
-    // UPDATE CV
-    // ==========================
-    if (array_key_exists('cv_url', $data)) {
+            $newCvPath = $data['cv_url'] ?: null;
 
-        $newCvPath = $data['cv_url'] ?: null;
+            if (
+                $candidate->cv_url &&
+                $candidate->cv_url !== $newCvPath
+            ) {
+                Storage::disk('public')
+                    ->delete($candidate->cv_url);
+            }
 
-        if (
-            $candidate->cv_url &&
-            $candidate->cv_url !== $newCvPath
-        ) {
-            Storage::disk('public')
-                ->delete($candidate->cv_url);
+            $data['cv_url'] = $newCvPath;
         }
 
-        $data['cv_url'] = $newCvPath;
-    }
+        // ==========================
+        // UPDATE CANDIDATE
+        // ==========================
+        $candidate->update($data);
 
-    // ==========================
-    // UPDATE CANDIDATE
-    // ==========================
-    $candidate->update($data);
+        // ==========================
+        // XỬ LÝ SKILL CŨ + SKILL MỚI
+        // ==========================
+        $skillIds = [];
 
-    // ==========================
-    // XỬ LÝ SKILL CŨ + SKILL MỚI
-    // ==========================
-    $skillIds = [];
+        foreach ($skillValues as $value) {
 
-    foreach ($skillValues as $value) {
+            // Skill đã tồn tại → value là ID
+            if (is_numeric($value)) {
+                $skillIds[] = (int) $value;
+                continue;
+            }
 
-        // Skill đã tồn tại → value là ID
-        if (is_numeric($value)) {
-            $skillIds[] = (int) $value;
-            continue;
+            // Skill mới → tạo trong bảng skills
+            $skill = Skill::firstOrCreate([
+                'name' => trim($value),
+            ]);
+
+            // Lấy ID của skill vừa tạo/tìm thấy
+            $skillIds[] = $skill->id;
         }
 
-        // Skill mới → tạo trong bảng skills
-        $skill = Skill::firstOrCreate([
-            'name' => trim($value),
-        ]);
+        // ==========================
+        // UPDATE BẢNG TRUNG GIAN
+        // candidate_skill
+        // ==========================
+        $candidate->skills()->sync($skillIds);
 
-        // Lấy ID của skill vừa tạo/tìm thấy
-        $skillIds[] = $skill->id;
+        // ==========================
+        // REDIRECT
+        // ==========================
+        return redirect()
+            ->route('candidates.index')
+            ->with(
+                'success',
+                'Candidate updated successfully.'
+            );
     }
-
-    // ==========================
-    // UPDATE BẢNG TRUNG GIAN
-    // candidate_skill
-    // ==========================
-    $candidate->skills()->sync($skillIds);
-
-    // ==========================
-    // REDIRECT
-    // ==========================
-    return redirect()
-        ->route('candidates.index')
-        ->with(
-            'success',
-            'Candidate updated successfully.'
-        );
-}
 
     /**
      * Remove the specified resource from storage.
@@ -301,4 +313,34 @@ class CandidateController extends Controller
 
         return $path;
     }
+
+    public function export()
+    {
+        ExportCandidatesJob::dispatch();
+
+        return redirect()
+            ->route('candidates.index')
+            ->with(
+                'success',
+                'Export request has been added to the queue.'
+            );
+    }
+    public function import(Request $request)
+{
+    $request->validate([
+        'file' => 'required|mimes:xlsx,xls'
+    ]);
+
+    Excel::import(
+        new CandidateImport,
+        $request->file('file')
+    );
+
+    return redirect()
+        ->route('candidates.index')
+        ->with(
+            'success',
+            'Import completed successfully.'
+        );
+}
 }
