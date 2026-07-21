@@ -255,13 +255,11 @@
                                 <td>
 
                                     @if ($candidate->avatar_url)
-                                        <span class="badge bg-info text-dark">
-                                            {{ pathinfo($candidate->avatar_url, PATHINFO_EXTENSION) }}
-                                        </span>
+                                        <img src="{{ Storage::url($candidate->avatar_url) }}"
+                                            alt="{{ $candidate->full_name }}" width="60" height="60"
+                                            class="rounded-circle" style="object-fit: cover;">
                                     @else
-                                        <span class="text-muted">
-                                            No Avatar
-                                        </span>
+                                        <span class="badge bg-secondary">No Avatar</span>
                                     @endif
 
                                 </td>
