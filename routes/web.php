@@ -8,7 +8,7 @@ use App\Http\Controllers\CandidateActivationController;
 use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\EducationController;
 use App\Http\Controllers\SkillController;
-
+use App\Http\Controllers\CandidateExportController;
 
 // ==========================================
 // DASHBOARD
@@ -73,6 +73,12 @@ Route::prefix('candidates')
             '/show/{candidate}',
             [CandidateController::class, 'show']
         )->name('show');
+
+
+        Route::get(
+            '/export',
+            [CandidateController::class, 'export']
+        )->name('export');
     });
 
 
@@ -116,3 +122,9 @@ Route::get(
 )
     ->middleware('signed')
     ->name('candidates.activate');
+
+
+    Route::post(
+    '/import',
+    [CandidateController::class, 'import']
+)->name('import');
